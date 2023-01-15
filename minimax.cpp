@@ -64,18 +64,17 @@ class GameState {
             int i = 0*this->friendTurn + 1*(!this->friendTurn);
 
             //iterate on all future robot's locations that are possible
-            //NOTE : had to add std::allocator otherwise error
-            vector<int, std::allocator<int>> robotNextLocations = this->mazeSquares[this->robots[i].location];
-            for(int j = 0; j < robotNextLocations.size(); j++){
+            vector<int> robotNextLocations = this->mazeSquares[this->robots[i].location];
+            for(int robotNextLocation : robotNextLocations){
 
                 //adapt the robot's location in successor state
                 vector<Robot> adaptedRobots = this->robots;
-                adaptedRobots[i].location = robotNextLocations[j];
+                adaptedRobots[i].location = robotNextLocation;
 
                 //adapt the coins on ground in successor state only if we find a coin on the robot's next location
                 list<int> adaptedCoinsOnGround = this->coinsOnGround;
                 
-                auto it = std::find(coinsOnGround.begin(), coinsOnGround.end(), robotNextLocations[j]);
+                auto it = std::find(coinsOnGround.begin(), coinsOnGround.end(), robotNextLocation);
                 if (it != coinsOnGround.end()){     
                     //NOTE : malloc() error with "erase" if vector of coins on the ground
                     adaptedCoinsOnGround.erase(it);
