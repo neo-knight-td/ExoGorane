@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <iterator>
 #include <list>
-
+#include <tuple>
 
 using namespace std;
 
@@ -87,41 +87,57 @@ class GameState {
             }
         }
 
-        int getMinimaxValue(){
+        tuple<int, int> getMinimax(){
+            //default move returned is -1
+            int moveToMinimax = -1;
+            //if terminal state, return Minimax value & -1 (no next move)
             if (this->isTerminalState()){
                 //TODO : next lines to be modified. Friendly robot is not always at index 0
                 //TODO : ask on ExoLegend Discord if coins of dead robot count in team score
                 if (this->robots[0].isAlive){
                     //return the state utility (nb of coins gathered)
-                    return this->robots[0].coinNb;
+                    return {this->robots[0].coinNb, moveToMinimax};
                 }
                 else{
                     //if friendly robot died, terminal state utility is 0
-                    return 0;
+                    return {0, moveToMinimax};
                 }
             }
             else {
                 //if not a terminal state, need to compute successor states
                 this->generateSuccessors();
 
+                //select index of robot who has its turn
+                int i = 0*this->friendTurn + 1*(!this->friendTurn);
+
                 //if its friend's turn (maximizer) then return the value that maximizes the minimum gains of the adversary
                 if (this->friendTurn){
                     int value = -1000;
                     for(list<GameState>::iterator it = this->successors.begin(); it != this->successors.end(); it++){
-                        //NOTE : it is an iterator (pointer). Need to add * to access successor object value
-                        value = max(value, (*it).getMinimaxValue());
+                        //NOTE : "it" is an iterator (pointer). Need to add * to access successor object value
+                        int successorMinimax = get<0>((*it).getMinimax());
+
+                        if (successorMinimax > value){
+                            value = successorMinimax;
+                            moveToMinimax = (*it).robots[i].location;
+                        }
                     }
-                    return value;
+                    return {value, moveToMinimax};
                 }
 
                 //if its adversary's turn (minimizer) then return the value that minimizes the maximums gains of the friend
                 else {
                     int value = 1000;
                     for(list<GameState>::iterator it = this->successors.begin(); it != this->successors.end(); it++){
-                        //NOTE : it is an iterator (pointer). Need to add * to access successor object value
-                        value = min(value, (*it).getMinimaxValue());
+                        //NOTE : "it" is an iterator (pointer). Need to add * to access successor object value
+                        int successorMinimax = get<0>((*it).getMinimax());
+
+                        if (successorMinimax < value){
+                            value = successorMinimax;
+                            moveToMinimax = (*it).robots[i].location;
+                        }
                     }
-                    return value;
+                    return {value, moveToMinimax};
                 }
             }
         }
@@ -129,7 +145,9 @@ class GameState {
 
 int main()
 {
-    std::cout << "Hello World" << std::endl;
+    std::cout << "Hello Gorane !" << std::endl;
+
+
     vector<vector <int>> mazeVector = {{1,3},{0,2},{1,5},{0,4},{3,5},{2,4}};
     list<int> coinsVector = {3};
     Robot robot1 = Robot(0, 0, true, true);
@@ -152,6 +170,13 @@ int main()
     //  A should win by moving to square index 3 and capturing coin o
 
     GameState simpleGameState = GameState(mazeVector, coinsVector, robotVector, 0, true);
-    std::cout << simpleGameState.getMinimaxValue() << std::endl;
-    //TODO implement getMiniMax() that return both the Minimax value & move under std::tuple<int, int>
+
+    int valueOfMinimax;
+    int moveToMinimax;
+
+    std::tie(valueOfMinimax, moveToMinimax) = simpleGameState.getMinimax();
+
+    std::cout << "Robot A MiniMax value is " << valueOfMinimax << std::endl; 
+    std::cout << "Robot A should move to square " << moveToMinimax << std::endl;
+
 }
