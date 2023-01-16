@@ -34,18 +34,19 @@ class GameState {
         //elements from the vector. More info : https://stackoverflow.com/a/61409233/15539525
         std::list <GameState> successors;
         int depthOfState;
-        bool friendTurn;
+        //id of team who has its turn
+        int teamId;
 
         //for the moment, max depth is set by default to 3 (constant)
         const int MAX_DEPTH = 3;
 
     public:
-        GameState(vector<vector <int>> paramMazeSquares, list<int> paramCoinsOnGround, vector <Robot> paramRobots, int paramDepthOfState, bool paramFriendTurn){
+        GameState(vector<vector <int>> paramMazeSquares, list<int> paramCoinsOnGround, vector <Robot> paramRobots, int paramDepthOfState, int  paramTeamId){
             this->mazeSquares = paramMazeSquares;
             this->coinsOnGround = paramCoinsOnGround;
             this->robots = paramRobots;
             this->depthOfState = paramDepthOfState;
-            this->friendTurn = paramFriendTurn;
+            this->teamId = paramTeamId;
         }
 
         bool isTerminalState(){
@@ -61,7 +62,7 @@ class GameState {
         void generateSuccessors(){
 
             //select index of robot who has its turn
-            int i = 0*this->friendTurn + 1*(!this->friendTurn);
+            int i = this->teamId;
 
             //iterate on all future robot's locations that are possible
             vector<int> robotNextLocations = this->mazeSquares[this->robots[i].location];
@@ -73,7 +74,8 @@ class GameState {
 
                 //adapt the coins on ground in successor state only if we find a coin on the robot's next location
                 list<int> adaptedCoinsOnGround = this->coinsOnGround;
-                
+                updateCoins(&adaptedCoinsOnGround, &(adaptedRobots[i]));
+                /*
                 auto it = std::find((this->coinsOnGround).begin(), (this->coinsOnGround).end(), robotNextLocation);
                 if (it != (this->coinsOnGround).end()){     
                     //NOTE : malloc() error with "erase" if vector of coins on the ground
@@ -81,14 +83,23 @@ class GameState {
                     adaptedCoinsOnGround.remove(*it);
                     adaptedRobots[i].coinNb++;
                 }
+                */
 
                 //add the successor to the list of successors of current game state
                 //NOTE : "new Obj()" returns reference to newly created object. Need to add * to access value of that object
-                this->successors.push_back(* new GameState(this->mazeSquares,adaptedCoinsOnGround,adaptedRobots,this->depthOfState+1,!this->friendTurn));
+                this->successors.push_back(* new GameState(this->mazeSquares,adaptedCoinsOnGround,adaptedRobots,this->depthOfState+1,(this->teamId+1)%2));
             }
         }
 
-        tuple<int, int> getMinimax(){
+        void updateCoins(list<int> *pCoinsOnGround, Robot *pRobot){
+            auto it = std::find((*pCoinsOnGround).begin(), (*pCoinsOnGround).end(), (*pRobot).location);
+            if (it != (*pCoinsOnGround).end()){     
+                (*pCoinsOnGround).remove(*it);
+                (*pRobot).coinNb++;
+            }
+        }
+
+        /*tuple<int, int> getMinimax(){
             //default move returned is -1
             int moveToMinimax = -1;
             //if terminal state, return Minimax value & -1 (no next move)
@@ -142,11 +153,12 @@ class GameState {
                 }
             }
         }
+        */
 
         void printGameState(){
             string outerWall = "*";
-            string innerVWwall = "|";
-            string innerHWwall = "-";
+            string innerVWall = "|";
+            string innerHWall = "-";
             string blank = " ";
             string goraneRobot = "G";
             string enemyRobot = "E";
@@ -166,7 +178,7 @@ class GameState {
                 std::cout << outerWall;
 
                 for (int j = 0; j< (dim_h*2 + 1); j++){
-                    //if i is odd, print line square ids or vertical walls
+                    //if i is odd, print line with square ids or vertical walls
                     if(i%2 != 0){
                         //if j is odd, you are in a square
                         if(j%2 != 0){
@@ -184,8 +196,8 @@ class GameState {
                                 currentSquareIdShouldBeBlank = false;
                                 std::cout << enemyRobot;
                             }
-                            //if no robot is to print, maybe a coin should be printed
 
+                            //if no robot is to print, maybe a coin should be printed
                             for(int coinLocation: this->coinsOnGround){
                                 if (coinLocation == currentSquareId){
                                     currentSquareIdShouldBeBlank = false;
@@ -198,21 +210,38 @@ class GameState {
                                 std::cout << blank;
                         }
 
-                        //if j is even and not equal either to first nor last value
+                        //if j is even and not equal either to first nor last value, an inner wall or blank should be printed
                         else if(j%2 == 0 && j!=0 &&  j != (dim_h*2)){
-                            //TODO : still have to see if innerVWall needs to be printed
-                            std::cout << innerVWwall;
+                            int leftSquareId = (i-1)/2 + (j-2)/2*dim_v;
+                            int rightSquareId = (i-1)/2 + j/2*dim_v;
+
+                            auto it = std::find(this->mazeSquares[leftSquareId].begin(), this->mazeSquares[leftSquareId].end(), rightSquareId);
+                            //if right square is not accessible from left square, print inner wall
+                            if (it == this->mazeSquares[leftSquareId].end())
+                                std::cout << innerVWall;
+                            //otherwise print blank
+                            else
+                                std::cout << blank;
+
                         }
                     }
                     //if i is even, print line of horizontal walls or blanks
                     else if(i%2 == 0){
                         //if j is odd, print square id
                         if(j%2 != 0){
-                            std::cout << innerHWwall;
+                            int upperSquareId = (i-2)/2 + (j-1)/2*dim_v;
+                            int lowerSquareId = i/2 + (j-1)/2*dim_v;
+
+                            auto it = std::find(this->mazeSquares[upperSquareId].begin(), this->mazeSquares[upperSquareId].end(), lowerSquareId);
+                            //if lower square is not accessible from upper square, print inner wall
+                            if (it == this->mazeSquares[upperSquareId].end())
+                                std::cout << innerHWall;
+                            //otherwise print blank
+                            else
+                                std::cout << blank;
                         }
-                        //if j is even and not equal either to first nor last value
+                        //if j is even and not equal either to first nor last value (square intersections)
                         else if(j%2 == 0 && j!=0 &&  j != (dim_h*2)){
-                            //TODO : still have to see if innerVWall needs to be printed
                             std::cout << blank;
                         }
                     }
@@ -226,42 +255,3 @@ class GameState {
             std::cout << std::endl;
         }
 };
-
-int main()
-{
-    std::cout << "Hello Gorane !" << std::endl;
-
-
-    vector<vector <int>> mazeVector = {{1,3},{0,2},{1,5},{0,4},{3,5},{2,4}};
-    list<int> coinsVector = {3};
-    Robot robot1 = Robot(0, 0, true, true);
-    Robot robot2 = Robot(5, 0, true, false);
-    vector<Robot> robotVector = {robot1, robot2};
-
-    // Following simplified maze (3 x 2) is setup with 2 robots:
-
-    //  *****
-    //  *G $*
-    //  * | *
-    //  *  E*
-    //  *****
-
-    //  G is the Gorane robot
-    //  E is the Enemy
-    //  $ is a coin
-
-    //  G is only 1 square away from $ whereas E is 2 squares away from $
-    //  G should win by moving to square index 3 and capturing coin $
-
-    GameState simpleGameState = GameState(mazeVector, coinsVector, robotVector, 0, true);
-
-    int valueOfMinimax;
-    int moveToMinimax;
-
-    std::tie(valueOfMinimax, moveToMinimax) = simpleGameState.getMinimax();
-
-    std::cout << "Robot G's MiniMax value is " << valueOfMinimax << std::endl; 
-    std::cout << "Robot G should move to square " << moveToMinimax << std::endl;
-
-    simpleGameState.printGameState();
-}
