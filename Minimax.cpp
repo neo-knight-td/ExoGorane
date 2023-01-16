@@ -60,24 +60,15 @@ class Minimax : public Strategy{
                 //if its minimizer's turn then return the value that minimizes the maximums gains of the opponent
                 else {
                     int value = 1000;
-                    int depth = 1000;
+                    int depth;
                     for(list<GameState>::iterator it = (gameState.successors).begin(); it != (gameState.successors).end(); it++){
                         //NOTE : "it" is an iterator (pointer). Need to add * to access successor object value
                         int successorMinimax;
-                        int depthToMinimax;
-                        std::tie(successorMinimax, std::ignore, depthToMinimax) = getValueOfNextState(*it, topOfTreeTeamId);
+                        std::tie(successorMinimax, std::ignore, depth) = getValueOfNextState(*it, topOfTreeTeamId);
 
                         if (successorMinimax < value){
                             value = successorMinimax;
                             moveToNextState = (*it).robots[gameState.teamId].location;
-                        }
-                        //if 2 successors lead to same minimax value
-                        else if (successorMinimax == value){
-                            //check if depth to minimax from current successor is smaller
-                            if (depthToMinimax < depth){
-                                moveToNextState = (*it).robots[gameState.teamId].location;
-                                depth = depthToMinimax;
-                            }
                         }
                     }
                     return {value, moveToNextState, depth};
