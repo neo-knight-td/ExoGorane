@@ -26,6 +26,8 @@ class Robot{
 class GameState {
     public:
         std::vector<vector <int>> mazeSquares;
+        int mazeHDim;
+        int mazeVDim;
         //NOTE : use a list of coins on the ground iso vector. This to avoid pointer invalidation when creating/erasing
         //elements from the vector. More info : https://stackoverflow.com/a/61409233/15539525
         std::list<int> coinsOnGround;
@@ -38,11 +40,13 @@ class GameState {
         int teamId;
 
         //for the moment, max depth is set by default to 3 (constant)
-        const int MAX_DEPTH = 3;
+        const int MAX_DEPTH = 10;
 
     public:
-        GameState(vector<vector <int>> paramMazeSquares, list<int> paramCoinsOnGround, vector <Robot> paramRobots, int paramDepthOfState, int  paramTeamId){
+        GameState(vector<vector <int>> paramMazeSquares, int paramMazeHDim, list<int> paramCoinsOnGround, vector <Robot> paramRobots, int paramDepthOfState, int  paramTeamId){
             this->mazeSquares = paramMazeSquares;
+            this->mazeHDim = paramMazeHDim;
+            this->mazeVDim = this->mazeSquares.size()/mazeHDim;
             this->coinsOnGround = paramCoinsOnGround;
             this->robots = paramRobots;
             this->depthOfState = paramDepthOfState;
@@ -84,10 +88,9 @@ class GameState {
                     adaptedRobots[i].coinNb++;
                 }
                 */
-
                 //add the successor to the list of successors of current game state
                 //NOTE : "new Obj()" returns reference to newly created object. Need to add * to access value of that object
-                this->successors.push_back(* new GameState(this->mazeSquares,adaptedCoinsOnGround,adaptedRobots,this->depthOfState+1,(this->teamId+1)%2));
+                this->successors.push_back(* new GameState(this->mazeSquares,this->mazeHDim,adaptedCoinsOnGround,adaptedRobots,this->depthOfState+1,(this->teamId+1)%2));
             }
         }
 
@@ -164,8 +167,9 @@ class GameState {
             string enemyRobot = "E";
             string coin = "$";
 
-            int dim_h = 2;
-            int dim_v = 3;
+            //only works with a squared number of mazes
+            int dim_h = this->mazeHDim;
+            int dim_v = this->mazeVDim;
 
             int square_id;
 
