@@ -65,6 +65,6 @@ Third attribute of the `GameState` class is a vector of robots (ref `Robot` clas
 Fourth attribute of the `GameState` class is a list of successor state to the current state. These successors are also of type `GameState`.
 
 ## Results
-Ez Win!
+Ez Win! :) 
 
 
