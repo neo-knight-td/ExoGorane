@@ -15,25 +15,13 @@ class Minimax {//: public Strategy{
         tuple<int, int, int> getValueOfNextState(GameState gameState, int topOfTreeTeamId){
             int moveToNextState;
             int depthToTerminalState;
-            /*
-            //default move & utility returned are -1
-            int valueOfNextState;
-            int moveToNextState;
-            int depthToTerminalState;
 
-            //executed checks common to all strategies
-            std::tie(valueOfNextState,moveToNextState,depthToTerminalState) = Strategy::getValueOfNextState(gameState, topOfTreeTeamId);
-            //if value of or/and move to next state is/are different that default value, next state is terminal state 
-            if(valueOfNextState != this->defaultValueOfNextState || moveToNextState != this->defaultMoveToNextState)
-                return {valueOfNextState, moveToNextState, depthToTerminalState};
-
-            */
-
-            //if terminal state, return current state utility value & default next move (-1)
             if (gameState.isTerminalState()){
-                depthToTerminalState = gameState.depthOfState;
+                depthToTerminalState = 0;
                 //TODO : next lines to be modified. Does not implement more than 2 robots
                 //TODO : ask on ExoLegend Discord if coins of dead robot count in team score
+
+                //if utility increased in this state, reset the depth to 0
                 if (gameState.robots[topOfTreeTeamId].isAlive){
                     //return the state utility
                     return {gameState.robots[topOfTreeTeamId].coinNb - gameState.robots[(topOfTreeTeamId+1)%2].coinNb, moveToNextState, depthToTerminalState};
@@ -58,10 +46,19 @@ class Minimax {//: public Strategy{
                         int depthToMinimax;
 
                         //NOTE : debug purpose only -> bug; depthToMinimax is crap
+                        /*
                         if (gameState.depthOfState == 0){//(gameState.depthOfState == 2 && gameState.robots[1].location == 23){
                             cout << "Hello" << endl;
                         }
+                        */
+                        
                         std::tie(successorMinimax, std::ignore, depthToMinimax) = getValueOfNextState(*it, topOfTreeTeamId);
+
+                        //if utility went up in this state, reset depth variable to 0
+                        if (gameState.utilGoesUp)
+                            depthToMinimax = 0;
+                        else
+                            depthToMinimax++;
 
                         if (successorMinimax > value){
                             value = successorMinimax;
@@ -78,9 +75,12 @@ class Minimax {//: public Strategy{
                         }
 
                         //NOTE : debug purpose only
+                        /*
                         if (gameState.depthOfState == 0){//(gameState.depthOfState == 2 && gameState.robots[1].location == 23){
                             cout << "Hello" << endl;
                         }
+                        */
+                        
                     }
                     return {value, moveToNextState, depth};
                 }
@@ -95,6 +95,12 @@ class Minimax {//: public Strategy{
                         int depthToMinimax;
 
                         std::tie(successorMinimax, std::ignore, depthToMinimax) = getValueOfNextState(*it, topOfTreeTeamId);
+                        
+                        //if utility went up in this state, reset depth variable to 0
+                        if (gameState.utilGoesUp)
+                            depthToMinimax = 0;
+                        else
+                            depthToMinimax++;
 
                         if (successorMinimax < value){
                             value = successorMinimax;
