@@ -60,15 +60,15 @@ int main()
     //  Example 3 : bigger maze (5 x 5) with 2 robots and 3 coins:
 
     //  ***********
-    //  *      G  *
+    //  *G       $*
     //  *  -   - -*
-    //  * |   |E  *
+    //  * |   |   *
     //  *         *
     //  *       | *
     //  *         *
     //  *       | *
     //  *- - -    *
-    //  *$     $| *
+    //  *$     $|E*
     //  ***********
 
     // G only way to win is to pursue coin closest to E first ($ in square 19)
@@ -87,7 +87,7 @@ int main()
         {15},{22,16},{21,23},{22,24},{23}//column 5 of maze
     };
     int mazeHDim = 5;
-    list<int> coinsVector = {4,19,20};
+    list<int> coinsVector = {14,20,19};
     //list<int> coinsVector = {4,19};
     Robot robotG = Robot(0, 0, true, true);
     Robot robotE = Robot(24, 0, true, false);
@@ -99,7 +99,7 @@ int main()
     int teamId = 0;
     vector<string> teamNames = {"Goranes", "Enemy"};
 
-    GameState simpleGameState = GameState(mazeVector, mazeHDim, coinsVector, robotVector, 0, teamId);
+    GameState simpleGameState = GameState(mazeVector, mazeHDim, coinsVector, robotVector, 0, teamId, false);
     Minimax minimaxStrategy;
 
     simpleGameState.printGameState();
