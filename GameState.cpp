@@ -38,12 +38,14 @@ class GameState {
         int depthOfState;
         //id of team who has its turn
         int teamId;
+        //bool true if utility of state increases compared to parent state (for team with id teamId)
+        bool utilGoesUp;
 
         //for the moment, max depth is set by default to 3 (constant)
-        const int MAX_DEPTH = 10;
+        const int MAX_DEPTH = 12;
 
     public:
-        GameState(vector<vector <int>> paramMazeSquares, int paramMazeHDim, list<int> paramCoinsOnGround, vector <Robot> paramRobots, int paramDepthOfState, int  paramTeamId){
+        GameState(vector<vector <int>> paramMazeSquares, int paramMazeHDim, list<int> paramCoinsOnGround, vector <Robot> paramRobots, int paramDepthOfState, int  paramTeamId, bool paramUtilGoesUp){
             this->mazeSquares = paramMazeSquares;
             this->mazeHDim = paramMazeHDim;
             this->mazeVDim = this->mazeSquares.size()/mazeHDim;
@@ -51,6 +53,7 @@ class GameState {
             this->robots = paramRobots;
             this->depthOfState = paramDepthOfState;
             this->teamId = paramTeamId;
+            this->utilGoesUp = paramUtilGoesUp;
         }
 
         bool isTerminalState(){
@@ -78,28 +81,23 @@ class GameState {
 
                 //adapt the coins on ground in successor state only if we find a coin on the robot's next location
                 list<int> adaptedCoinsOnGround = this->coinsOnGround;
-                updateCoins(&adaptedCoinsOnGround, &(adaptedRobots[i]));
-                /*
-                auto it = std::find((this->coinsOnGround).begin(), (this->coinsOnGround).end(), robotNextLocation);
-                if (it != (this->coinsOnGround).end()){     
-                    //NOTE : malloc() error with "erase" if vector of coins on the ground
-                    //NOTE : use remove iso erase otherwise erase elements from original list (this->coinsOnGround). See https://stackoverflow.com/questions/799314/difference-between-erase-and-remove
-                    adaptedCoinsOnGround.remove(*it);
-                    adaptedRobots[i].coinNb++;
-                }
-                */
+                bool utilGoesUpInSuccessorState = updateCoins(&adaptedCoinsOnGround, &(adaptedRobots[i]));
+
                 //add the successor to the list of successors of current game state
                 //NOTE : "new Obj()" returns reference to newly created object. Need to add * to access value of that object
-                this->successors.push_back(* new GameState(this->mazeSquares,this->mazeHDim,adaptedCoinsOnGround,adaptedRobots,this->depthOfState+1,(this->teamId+1)%2));
+                this->successors.push_back(* new GameState(this->mazeSquares,this->mazeHDim,adaptedCoinsOnGround,adaptedRobots,this->depthOfState+1,(this->teamId+1)%2, utilGoesUpInSuccessorState));
             }
         }
 
-        void updateCoins(list<int> *pCoinsOnGround, Robot *pRobot){
+        //update coins on ground (& robot) in successor state. if update is made, returns true
+        bool updateCoins(list<int> *pCoinsOnGround, Robot *pRobot){
             auto it = std::find((*pCoinsOnGround).begin(), (*pCoinsOnGround).end(), (*pRobot).location);
             if (it != (*pCoinsOnGround).end()){     
                 (*pCoinsOnGround).remove(*it);
                 (*pRobot).coinNb++;
+                return true;
             }
+            return false;
         }
 
         /*tuple<int, int> getMinimax(){
@@ -159,6 +157,7 @@ class GameState {
         */
 
         void printGameState(){
+            //TODO solve display bug
             string outerWall = "*";
             string innerVWall = "|";
             string innerHWall = "-";
