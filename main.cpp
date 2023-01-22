@@ -6,6 +6,7 @@
 #include <tuple>
 #include "Minimax.cpp"
 #include <cmath>
+#include <chrono>
 
 int main()
 {
@@ -105,11 +106,16 @@ int main()
     while (!simpleGameState.isTerminalState())
     {
         std:cout << "Turn to " << teamNames[teamId] << " team." << endl;
+        auto begin = std::chrono::high_resolution_clock::now();
 
         //compute minimax value & move to minimax
         std::tie(valueOfMinimax, moveToMinimax, std::ignore) = minimaxStrategy.getValueOfNextState(simpleGameState, teamId);
 
-        std::cout << "Robot " << teamNames[teamId] << " should move to "<< moveToMinimax << std::endl; 
+        auto end = std::chrono::high_resolution_clock::now();
+        auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - begin);
+
+        std::cout << "Robot " << teamNames[teamId] << " should move to "<< moveToMinimax << "." << std::endl;
+        printf("Time measured: %.3f microseconds.\n", elapsed.count()* 1e-3);
 
         //update game state
         // > robot location
