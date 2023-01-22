@@ -56,6 +56,13 @@ class GameState {
             this->utilGoesUp = paramUtilGoesUp;
         }
 
+
+        //this function returns the utility of the state. Only parameter is the id of team on top of the tree
+        int getStateUtility(int topOfTreeTeamId){
+            //utility should remain monotone function of depth
+            return this->robots[topOfTreeTeamId].coinNb;//- this->robots[(topOfTreeTeamId+1)%2].coinNb;
+        }
+
         bool isTerminalState(){
             
             if (this->coinsOnGround.size() == 0 || this->depthOfState >= MAX_DEPTH){
