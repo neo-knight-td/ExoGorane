@@ -60,7 +60,7 @@ int main()
     //  Example 3 : bigger maze (5 x 5) with 2 robots and 3 coins:
 
     //  ***********
-    //  *G       $*
+    //  *G     $  *
     //  *  -   - -*
     //  * |   |   *
     //  *         *
@@ -68,7 +68,7 @@ int main()
     //  *         *
     //  *       | *
     //  *- - -    *
-    //  *$     $|E*
+    //  *    $ $|E*
     //  ***********
 
     // G only way to win is to pursue coin closest to E first ($ in square 19)
@@ -78,17 +78,13 @@ int main()
     vector<vector <int>> mazeVector
     {
         {5,1},{0,2},{1,7,3},{2,8},{9},//column 1 of maze
-        //{5,1},{0},{1,7,3},{2,8},{9},//column 1 of maze
-        {10,0},{11,7},{6,12,8,2},{7,13,3},{4,14},//column 2 of maze
-        //{0},{11,7},{6,12,8,2},{7,13,3},{14,4},//column 2 of maze
-        {15,11,5},{10,12,6},{11,17,13,7},{12,18,8},{9,19},//column 3 of maze
+        {10,0},{11,7},{6,12,8,2},{7,13,3},{14,4},//column 2 of maze
+        {15,11,5},{10,12,6},{11,17,13,7},{12,18,8},{19,9},//column 3 of maze
         {20,10},{21,17},{16,18,12},{19,17,13},{18,14},//column 4 of maze
-        //{20},{21,17,11},{16,18,12},{17,19,13},{18,14},//column 4 of maze
         {15},{22,16},{21,23},{22,24},{23}//column 5 of maze
     };
     int mazeHDim = 5;
-    list<int> coinsVector = {14,20,19};
-    //list<int> coinsVector = {4,19};
+    list<int> coinsVector = {15,14,19};
     Robot robotG = Robot(0, 0, true, true);
     Robot robotE = Robot(24, 0, true, false);
     vector<Robot> robotVector = {robotG, robotE};
@@ -96,6 +92,8 @@ int main()
     
     int valueOfMinimax;
     int moveToMinimax;
+
+    //id of team playing first
     int teamId = 0;
     vector<string> teamNames = {"Goranes", "Enemy"};
 
