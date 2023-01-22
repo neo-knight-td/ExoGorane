@@ -41,9 +41,6 @@ class GameState {
         //bool true if utility of state increases compared to parent state (for team with id teamId)
         bool utilGoesUp;
 
-        //for the moment, max depth is set by default to 3 (constant)
-        const int MAX_DEPTH = 12;
-
     public:
         GameState(vector<vector <int>> paramMazeSquares, int paramMazeHDim, list<int> paramCoinsOnGround, vector <Robot> paramRobots, int paramDepthOfState, int  paramTeamId, bool paramUtilGoesUp){
             this->mazeSquares = paramMazeSquares;
@@ -64,8 +61,7 @@ class GameState {
         }
 
         bool isTerminalState(){
-            
-            if (this->coinsOnGround.size() == 0 || this->depthOfState >= MAX_DEPTH){
+            if (this->coinsOnGround.size() == 0){
                 return true;
             }
             else{
@@ -91,12 +87,15 @@ class GameState {
                 bool utilGoesUpInSuccessorState = updateCoins(&adaptedCoinsOnGround, &(adaptedRobots[i]));
 
                 //add the successor to the list of successors of current game state
-                //NOTE : "new Obj()" returns reference to newly created object. Need to add * to access value of that object
-                this->successors.push_back(* new GameState(this->mazeSquares,this->mazeHDim,adaptedCoinsOnGround,adaptedRobots,this->depthOfState+1,(this->teamId+1)%2, utilGoesUpInSuccessorState));
+                //NOTE : next step is to create a new successor & add it to the list of successors.
+                //better do this in 2 steps. Otherwise you need to use the "new" keyword which allocates memory on the heap
+                //and is never freed. this lead to a huge amount of RAM consummed. 
+                GameState successorGameState(this->mazeSquares,this->mazeHDim,adaptedCoinsOnGround,adaptedRobots,this->depthOfState+1,(this->teamId+1)%2, utilGoesUpInSuccessorState);
+                this->successors.push_back(successorGameState);
             }
         }
 
-        //update coins on ground (& robot) in successor state. if update is made, returns true
+        //update coins on ground (& in robot) in successor state. if update is made, returns true
         bool updateCoins(list<int> *pCoinsOnGround, Robot *pRobot){
             auto it = std::find((*pCoinsOnGround).begin(), (*pCoinsOnGround).end(), (*pRobot).location);
             if (it != (*pCoinsOnGround).end()){     

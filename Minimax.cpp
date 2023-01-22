@@ -14,31 +14,33 @@ using namespace std;
         int moveToMinimax;
 
         //if terminal state
-        if (gameState.isTerminalState()){
-            int depthReseted = 0;
+        if (gameState.isTerminalState() || gameState.depthOfState >= MAX_DEPTH){
+            int depthZero = 0;
             int dummyMove = -1;
             
             //if playing team's robot is alive
             if (gameState.robots[topOfTreeTeamId].isAlive){
                 //return the state utility (playing team's robot coin score minus coin score of opponent robot)
-                return {gameState.getStateUtility(topOfTreeTeamId), dummyMove, depthReseted};
+                return {gameState.getStateUtility(topOfTreeTeamId), dummyMove, depthZero};
             }
             else{
                 //if friendly robot died, terminal state utility is 0
                 //TODO : ask on ExoLegend Discord if coins of dead robot count in team score
-                return {0, dummyMove, depthReseted};
+                return {0, dummyMove, depthZero};
             }
         }
         
         //if state is not terminal
         else {
+            int value;
+            int depthToMinimax;
             //generate the successor states from the current state
             gameState.generateSuccessors();
 
             //if its maximizer turn then return the value that maximizes the minimum gains of the opponent
             if (gameState.teamId == topOfTreeTeamId){
-                int value = -1000;
-                int depthToMinimax= 1000;//
+                value = -1000;
+                depthToMinimax= 1000;//
                 for(list<GameState>::iterator it = (gameState.successors).begin(); it != (gameState.successors).end(); it++){
                     //NOTE : "it" is an iterator (pointer). Need to add * to access successor object value
                     int successorMinimax;
@@ -82,13 +84,13 @@ using namespace std;
                     //if its the case then depth should be reset
                     depthToMinimax = 0;//
 
-                return {value, moveToMinimax, depthToMinimax};//
+                //return {value, moveToMinimax, depthToMinimax};//
             }
 
             //if its minimizer's turn then return the value that minimizes the maximums gains of the opponent
             else {
-                int value = 1000;
-                int depthToMinimax = -1000;
+                value = 1000;
+                depthToMinimax = -1000;
                 for(list<GameState>::iterator it = (gameState.successors).begin(); it != (gameState.successors).end(); it++){
                     //NOTE : "it" is an iterator (pointer). Need to add * to access successor object value
                     int successorMinimax;
@@ -121,7 +123,10 @@ using namespace std;
                     //if its the case then depth should be reset
                     depthToMinimax = 0;
 
-                return {value, moveToMinimax, depthToMinimax};
+                //return {value, moveToMinimax, depthToMinimax};
             }
+
+            //gameState.deleteSuccessors();
+            return {value, moveToMinimax, depthToMinimax};
         }
     }
