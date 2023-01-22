@@ -7,6 +7,9 @@
 
 using namespace std;
 
+    //getValueOfNextState is a recursive function that will explore the tree of states and return the maximum utility
+    //value reachable from the current game state. It will also provide the move required to reach that value & the depth
+    //at which that value exists in the tree
     tuple<int, int, int> Minimax :: getValueOfNextState(GameState gameState, int topOfTreeTeamId){
         int moveToMinimax;
 
@@ -18,7 +21,7 @@ using namespace std;
             //if playing team's robot is alive
             if (gameState.robots[topOfTreeTeamId].isAlive){
                 //return the state utility (playing team's robot coin score minus coin score of opponent robot)
-                return {gameState.robots[topOfTreeTeamId].coinNb - gameState.robots[(topOfTreeTeamId+1)%2].coinNb, dummyMove, depthReseted};
+                return {gameState.getStateUtility(topOfTreeTeamId), dummyMove, depthReseted};
             }
             else{
                 //if friendly robot died, terminal state utility is 0
@@ -40,21 +43,15 @@ using namespace std;
                     //NOTE : "it" is an iterator (pointer). Need to add * to access successor object value
                     int successorMinimax;
                     int depthToMinimax;
-
-                    //NOTE : debug purpose only -> bug;
-                    /*
-                    if (gameState.depthOfState == 0){//(gameState.depthOfState == 2 && gameState.robots[1].location == 23){
-                        cout << "Hello" << endl;
-                    }
-                    */
                     
                     std::tie(successorMinimax, std::ignore, depthToMinimax) = getValueOfNextState(*it, topOfTreeTeamId);
+                    depthToMinimax++;
 
-                    //if utility went up in this state, reset depth variable to 0
-                    if (gameState.utilGoesUp)
-                        depthToMinimax = 0;
-                    else
-                        depthToMinimax++;
+                    //NOTE : debug purpose only -> bug
+                    if (gameState.depthOfState == 0){//(gameState.depthOfState == 2 && gameState.robots[1].location == 23){
+                        //cout << "Hello" << endl;
+                    }
+                                                         
 
                     //if minimax from current successor is higher, update all 3 values to return
                     if (successorMinimax > value){
@@ -72,14 +69,18 @@ using namespace std;
                         }
                     }
 
-                    //NOTE : debug purpose only
-                    /*
+                    //NOTE : debug purpose only                    
                     if (gameState.depthOfState == 0){//(gameState.depthOfState == 2 && gameState.robots[1].location == 23){
-                        cout << "Hello" << endl;
+                        //cout << "Hello" << endl;
                     }
-                    */
+                    
                     
                 }
+
+                //let's say we found the true minimax, we have to check if we don't already have that value as utility
+                if (gameState.getStateUtility(topOfTreeTeamId) == value)
+                    //if its the case then depth should be reset
+                    depth = 0;
 
                 return {value, moveToMinimax, depth};
             }
@@ -94,12 +95,7 @@ using namespace std;
                     int depthToMinimax;
 
                     std::tie(successorMinimax, std::ignore, depthToMinimax) = getValueOfNextState(*it, topOfTreeTeamId);
-                    
-                    //if utility went up in this state, reset depth variable to 0
-                    if (gameState.utilGoesUp)
-                        depthToMinimax = 0;
-                    else
-                        depthToMinimax++;
+                    depthToMinimax++;
 
                     //if minimax from current successor is lower, update all 3 values to return
                     if (successorMinimax < value){
@@ -118,6 +114,13 @@ using namespace std;
                     }
                     
                 }
+
+
+                //let's say we found the true minimax, we have to check if we don't already have that value as utility
+                if (gameState.getStateUtility(topOfTreeTeamId) == value)
+                    //if its the case then depth should be reset
+                    depth = 0;
+
                 return {value, moveToMinimax, depth};
             }
         }
