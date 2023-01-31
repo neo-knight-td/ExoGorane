@@ -109,7 +109,7 @@ int main()
         auto begin = std::chrono::high_resolution_clock::now();
 
         //compute minimax value & move to minimax
-        std::tie(valueOfMinimax, moveToMinimax, std::ignore) = minimaxStrategy.getValueOfNextState(simpleGameState, teamId);
+        std::tie(valueOfMinimax, moveToMinimax, std::ignore, std::ignore) = minimaxStrategy.getValueOfNextState(simpleGameState, teamId);
 
         auto end = std::chrono::high_resolution_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - begin);

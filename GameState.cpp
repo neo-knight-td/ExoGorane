@@ -57,7 +57,7 @@ class GameState {
         //this function returns the utility of the state. Only parameter is the id of team on top of the tree
         int getStateUtility(int topOfTreeTeamId){
             //utility should remain monotone function of depth
-            return this->robots[topOfTreeTeamId].coinNb;//- this->robots[(topOfTreeTeamId+1)%2].coinNb;
+            return this->robots[topOfTreeTeamId].coinNb - this->robots[(topOfTreeTeamId+1)%2].coinNb;
         }
 
         bool isTerminalState(){
@@ -69,7 +69,8 @@ class GameState {
             }
         }
 
-        void generateSuccessors(){
+        //TODO resolve utilGoesUp here
+        void generateSuccessors(int topOfTreeTeamId){
 
             //select index of robot who has its turn
             int i = this->teamId;
@@ -84,7 +85,13 @@ class GameState {
 
                 //adapt the coins on ground in successor state only if we find a coin on the robot's next location
                 list<int> adaptedCoinsOnGround = this->coinsOnGround;
-                bool utilGoesUpInSuccessorState = updateCoins(&adaptedCoinsOnGround, &(adaptedRobots[i]));
+                bool utilGoesUpInSuccessorState = false;
+                int scoreMaxBeforeUpdatingCoins = adaptedRobots[topOfTreeTeamId].coinNb;
+                updateCoins(&adaptedCoinsOnGround, &(adaptedRobots[i]));
+
+                //util goes up to true if score of maximizer increases
+                if (adaptedRobots[topOfTreeTeamId].coinNb > scoreMaxBeforeUpdatingCoins)
+                    utilGoesUpInSuccessorState = true;
 
                 //add the successor to the list of successors of current game state
                 //NOTE : next step is to create a new successor & add it to the list of successors.
@@ -95,15 +102,13 @@ class GameState {
             }
         }
 
-        //update coins on ground (& in robot) in successor state. if update is made, returns true
-        bool updateCoins(list<int> *pCoinsOnGround, Robot *pRobot){
+        //update coins on ground (& in robot) in successor state
+        void updateCoins(list<int> *pCoinsOnGround, Robot *pRobot){
             auto it = std::find((*pCoinsOnGround).begin(), (*pCoinsOnGround).end(), (*pRobot).location);
             if (it != (*pCoinsOnGround).end()){     
                 (*pCoinsOnGround).remove(*it);
                 (*pRobot).coinNb++;
-                return true;
             }
-            return false;
         }
 
         /*tuple<int, int> getMinimax(){
