@@ -37,6 +37,7 @@ int main()
     Robot robotG = Robot(0, 0, true, true);
     Robot robotE = Robot(5, 0, true, false);
     vector<Robot> robotVector = {robotG, robotE};
+    int maxDepth = 11;
     */
 
     //  Example 2 : long maze (5x2) with 2 robots and 1 coin
@@ -56,6 +57,7 @@ int main()
     Robot robotG = Robot(1, 0, true, true);
     Robot robotE = Robot(7, 0, true, false);
     vector<Robot> robotVector = {robotG, robotE};
+    int maxDepth = 11;
     */
 
     //  Example 3 : bigger maze (5 x 5) with 2 robots and 3 coins:
@@ -75,7 +77,7 @@ int main()
     // G only way to win is to pursue coin closest to E first ($ in square 19)
     
     // Corresponding code :
-    ///*
+    /*
     vector<vector <int>> mazeVector
     {
         {5,1},{0,2},{1,7,3},{2,8},{9},//column 1 of maze
@@ -89,7 +91,37 @@ int main()
     Robot robotG = Robot(0, 0, true, true);
     Robot robotE = Robot(24, 0, true, false);
     vector<Robot> robotVector = {robotG, robotE};
-    //*/
+    int maxDepth = 11;
+    */
+
+    // Example 4 : simple maze (3 x 2) with 2 robots and 2 coins:
+
+    //  *****
+    //  *$ E*
+    //  *   *
+    //  *G| *
+    //  *   *
+    //  *$  *
+    //  *****
+
+    // If utility function only counts the number of coins in possession of G
+    // and max depth equal 3, then G has no preference going up or down (Minimax is equal to 1 either way).
+    // For G to chose to go up, max depth should be increased to 5. This would require additionnal computing time
+    // but going up would be rewarded by 2 whereas going down by 1 only.
+
+    // A utility function that counts coins of G minus coins of E allows chosing to move up without an
+    // increase of depth. Indeed, if G moves up then he prevents E from eating the dot and would be rewarded by 1.
+    // However, if G choses to go down he would be rewarded 0 because both G and E did eat a dot (1-1 = 0)
+    
+    // Corresponding code :
+    
+    vector<vector <int>> mazeVector = {{1,3},{2,0},{1,5},{0,4},{3,5},{2,4}};
+    int mazeHDim = 2;
+    list<int> coinsVector = {0,2};
+    Robot robotG = Robot(1, 0, true, true);
+    Robot robotE = Robot(3, 0, true, false);
+    vector<Robot> robotVector = {robotG, robotE};
+    int maxDepth = 3;
     
     int valueOfMinimax;
     int moveToMinimax;
@@ -99,7 +131,7 @@ int main()
     vector<string> teamNames = {"Goranes", "Enemy"};
 
     GameState simpleGameState = GameState(mazeVector, mazeHDim, coinsVector, robotVector, 0, teamId, false);
-    Minimax minimaxStrategy;
+    Minimax minimaxStrategy(maxDepth);
 
     simpleGameState.printGameState();
 
