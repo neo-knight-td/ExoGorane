@@ -40,9 +40,13 @@ class GameState {
         int teamId;
         //bool true if utility of state increases compared to parent state (for team with id teamId)
         bool utilGoesUp;
+        //time since start of game. Units are game turns (int)
+        int timeSinceStartOfGame;
+        //time interval at which gas closes
+        int gasClosingInterval;
 
     public:
-        GameState(vector<vector <int>> paramMazeSquares, int paramMazeHDim, list<int> paramCoinsOnGround, vector <Robot> paramRobots, int paramDepthOfState, int  paramTeamId, bool paramUtilGoesUp){
+        GameState(vector<vector <int>> paramMazeSquares, int paramMazeHDim, list<int> paramCoinsOnGround, vector <Robot> paramRobots, int paramDepthOfState, int  paramTeamId, bool paramUtilGoesUp, int paramTimeSinceStartOfGame, int paramGasClosingInterval){
             this->mazeSquares = paramMazeSquares;
             this->mazeHDim = paramMazeHDim;
             this->mazeVDim = this->mazeSquares.size()/mazeHDim;
@@ -51,6 +55,8 @@ class GameState {
             this->depthOfState = paramDepthOfState;
             this->teamId = paramTeamId;
             this->utilGoesUp = paramUtilGoesUp;
+            this->timeSinceStartOfGame = paramTimeSinceStartOfGame;
+            this->gasClosingInterval = paramGasClosingInterval;
         }
 
 
@@ -61,15 +67,17 @@ class GameState {
         }
 
         bool isTerminalState(){
-            if (this->coinsOnGround.size() == 0){
+            //if no more coins on the ground
+            if (this->coinsOnGround.size() == 0)
                 return true;
-            }
-            else{
+            //if both robots are dead
+            else if(!this->robots[0].isAlive && !this->robots[1].isAlive)
+                return true;
+            else
                 return false;
-            }
         }
 
-        //TODO resolve utilGoesUp here
+
         void generateSuccessors(int topOfTreeTeamId){
 
             //select index of robot who has its turn
@@ -93,11 +101,52 @@ class GameState {
                 if (adaptedRobots[topOfTreeTeamId].coinNb > scoreMaxBeforeUpdatingCoins)
                     utilGoesUpInSuccessorState = true;
 
+                //adapt time in successor state
+                int adaptedTimeSinceStartOfGame = this->timeSinceStartOfGame + 1;
+
+                //adapt the maze if gas closing interval is reach
+                std::vector<vector <int>> successorMazeSquares = this->mazeSquares;
+                updateMaze(&successorMazeSquares);
+
+                /*
+                int narrowMazeTimeInterval = 6;
+                if (adaptedTimeSinceStartOfGame%narrowMazeTimeInterval == 0){
+                    int nbOfSquaresInTheGaz = adaptedTimeSinceStartOfGame/narrowMazeTimeInterval;
+
+                    for(int h=0; h < mazeSquares.size(); h++){
+                        //erase possible moves for first column(s) of the maze
+                        if (h < this->mazeVDim*nbOfSquaresInTheGaz)
+                            successorMazeSquares[h] = {};
+                        //erase possible moves for first line(s) of the maze
+                        else if (h%this->mazeVDim < nbOfSquaresInTheGaz)
+                            successorMazeSquares[h] = {};
+                        //erase possible moves for last line(s) of the maze
+                        else if (h%this->mazeVDim >= this->mazeVDim - nbOfSquaresInTheGaz)
+                            successorMazeSquares[h] = {};
+                        //erase possible moves for the last column(s) of the maze
+                        else if (h > this->mazeHDim*this->mazeVDim - nbOfSquaresInTheGaz*this->mazeVDim)
+                            successorMazeSquares[h] = {};
+                    }
+                }
+                */
+
+                //adapt robots if next location is in the gaz. 
+                updateRobotsLife(&successorMazeSquares, &adaptedRobots);
+
+                /*
+                //iterate on all robots (not only the one who has it's turn)
+                for (int k; k < adaptedRobots.size(); k++){
+                    //if square is empty, robot is dead
+                    if(successorMazeSquares[adaptedRobots[k].location].empty())
+                        adaptedRobots[k].isAlive = false;
+                }
+                */
+
                 //add the successor to the list of successors of current game state
                 //NOTE : next step is to create a new successor & add it to the list of successors.
                 //better do this in 2 steps. Otherwise you need to use the "new" keyword which allocates memory on the heap
-                //and is never freed. this lead to a huge amount of RAM consummed. 
-                GameState successorGameState(this->mazeSquares,this->mazeHDim,adaptedCoinsOnGround,adaptedRobots,this->depthOfState+1,(this->teamId+1)%2, utilGoesUpInSuccessorState);
+                //which is never freed. This lead to a huge amount of RAM consummed. 
+                GameState successorGameState(successorMazeSquares,this->mazeHDim,adaptedCoinsOnGround,adaptedRobots,this->depthOfState+1,(this->teamId+1)%2, utilGoesUpInSuccessorState, adaptedTimeSinceStartOfGame, this->gasClosingInterval);
                 this->successors.push_back(successorGameState);
             }
         }
@@ -108,6 +157,36 @@ class GameState {
             if (it != (*pCoinsOnGround).end()){     
                 (*pCoinsOnGround).remove(*it);
                 (*pRobot).coinNb++;
+            }
+        }
+
+        void updateMaze(vector<vector <int>> *pMazeSquares){
+            //adapt the maze if gas closing interval is reach
+            if (this->timeSinceStartOfGame%this->gasClosingInterval == 0){
+                int nbOfSquaresInTheGaz = this->timeSinceStartOfGame/gasClosingInterval;
+
+                for(int h=0; h < (*pMazeSquares).size(); h++){
+                    //erase possible moves for first column(s) of the maze
+                    if (h < this->mazeVDim*nbOfSquaresInTheGaz)
+                        (*pMazeSquares)[h] = {};
+                    //erase possible moves for first line(s) of the maze
+                    else if (h%this->mazeVDim < nbOfSquaresInTheGaz)
+                        (*pMazeSquares)[h] = {};
+                    //erase possible moves for last line(s) of the maze
+                    else if (h%this->mazeVDim >= this->mazeVDim - nbOfSquaresInTheGaz)
+                        (*pMazeSquares)[h] = {};
+                    //erase possible moves for the last column(s) of the maze
+                    else if (h > this->mazeHDim*this->mazeVDim - nbOfSquaresInTheGaz*this->mazeVDim)
+                        (*pMazeSquares)[h] = {};
+                }
+            }
+        }
+
+        void updateRobotsLife(vector<vector <int>> *pMazeSquares, vector<Robot> *pRobots){
+            for (int k; k < (*pRobots).size(); k++){
+                //if square is empty (gas), robot is dead
+                if((*pMazeSquares)[(*pRobots)[k].location].empty())
+                    (*pRobots)[k].isAlive = false;
             }
         }
 
@@ -173,6 +252,7 @@ class GameState {
             string innerVWall = "|";
             string innerHWall = "-";
             string blank = " ";
+            string gaz = "x";
             string goraneRobot = "G";
             string enemyRobot = "E";
             string coin = "$";
@@ -210,18 +290,27 @@ class GameState {
                                 currentSquareIdShouldBeBlank = false;
                                 std::cout << enemyRobot;
                             }
+                            else {
 
-                            //if no robot is to print, maybe a coin should be printed
-                            for(int coinLocation: this->coinsOnGround){
-                                if (coinLocation == currentSquareId){
-                                    currentSquareIdShouldBeBlank = false;
-                                    std::cout << coin;
+                                //if no robot is to printed, maybe a coin should be printed
+                                for(int coinLocation: this->coinsOnGround){
+                                    if (coinLocation == currentSquareId){
+                                        currentSquareIdShouldBeBlank = false;
+                                        std::cout << coin;
+                                    }
                                 }
-                            }
 
-                            //if we did not print a robot nor a coin, print nothing
-                            if (currentSquareIdShouldBeBlank)
-                                std::cout << blank;
+                                //print gaz if the current square is empty of possible moves
+                                if (this->mazeSquares[currentSquareId].empty() && currentSquareIdShouldBeBlank){
+                                    std::cout << gaz;
+                                    currentSquareIdShouldBeBlank = false;
+                                }
+                                      
+                                //if we did not print a robot nor a coin nor a gaz, print nothing
+                                if (currentSquareIdShouldBeBlank)
+                                    std::cout << blank;
+
+                                }
                         }
 
                         //if j is even and not equal either to first nor last value, an inner wall or blank should be printed

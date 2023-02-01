@@ -114,7 +114,7 @@ int main()
     // However, if G choses to go down he would be rewarded 0 because both G and E did eat a dot (1-1 = 0)
     
     // Corresponding code :
-    
+    /*
     vector<vector <int>> mazeVector = {{1,3},{2,0},{1,5},{0,4},{3,5},{2,4}};
     int mazeHDim = 2;
     list<int> coinsVector = {0,2};
@@ -122,15 +122,37 @@ int main()
     Robot robotE = Robot(3, 0, true, false);
     vector<Robot> robotVector = {robotG, robotE};
     int maxDepth = 3;
+    */
+
+    //Example 5 : 5 x 5 maze with
+
+    vector<vector <int>> mazeVector
+    {
+        {5,1},{0,2},{1,7,3},{2,8},{9},//column 1 of maze
+        {10,0},{11,7},{6,12,8,2},{7,13,3},{14,4},//column 2 of maze
+        {15,11,5},{10,12,6},{11,17,13,7},{12,18,8},{19,9},//column 3 of maze
+        {20,10},{21,17},{16,18,12},{19,17,13},{18,14},//column 4 of maze
+        {15},{22,16},{21,23},{22,24},{23}//column 5 of maze
+    };
+    int mazeHDim = 5;
+    list<int> coinsVector = {4,9};
+    Robot robotG = Robot(0, 0, true, true);
+    Robot robotE = Robot(24, 0, true, false);
+    vector<Robot> robotVector = {robotG, robotE};
+    int maxDepth = 11;
+    int gasClosingInterval = 6;
     
     int valueOfMinimax;
     int moveToMinimax;
 
     //id of team playing first
     int teamId = 0;
+
+    //time at start of the game
+    int startTime = 0;
     vector<string> teamNames = {"Goranes", "Enemy"};
 
-    GameState simpleGameState = GameState(mazeVector, mazeHDim, coinsVector, robotVector, 0, teamId, false);
+    GameState simpleGameState = GameState(mazeVector, mazeHDim, coinsVector, robotVector, 0, teamId, false, startTime, gasClosingInterval);
     Minimax minimaxStrategy(maxDepth);
 
     simpleGameState.printGameState();
@@ -157,6 +179,12 @@ int main()
         // > team id
         teamId = (teamId+1)%2;
         simpleGameState.teamId = teamId;
+        // > time since start of the game (+1)
+        simpleGameState.timeSinceStartOfGame++;
+        // > maze
+        simpleGameState.updateMaze(&simpleGameState.mazeSquares);
+        // > robot life
+        simpleGameState.updateRobotsLife(&simpleGameState.mazeSquares, &simpleGameState.robots);
 
         //print game state
         simpleGameState.printGameState();
