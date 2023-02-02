@@ -80,75 +80,61 @@ class GameState {
 
         void generateSuccessors(int topOfTreeTeamId){
 
-            //select index of robot who has its turn
+            //select index of robot that has his turn
             int i = this->teamId;
 
-            //iterate on all future robot's locations that are possible
+            //generate all future robot's locations that are possible
             vector<int> robotNextLocations = this->mazeSquares[this->robots[i].location];
-            for(int robotNextLocation : robotNextLocations){
+
+            //if robot can move (is not in the gas), create a successor for each to the next locations
+            if (!robotNextLocations.empty()){
+
+                for(int robotNextLocation : robotNextLocations){
 
                 //adapt the robot's location in successor state
                 vector<Robot> adaptedRobots = this->robots;
                 adaptedRobots[i].location = robotNextLocation;
 
-                //adapt the coins on ground in successor state only if we find a coin on the robot's next location
-                list<int> adaptedCoinsOnGround = this->coinsOnGround;
+                //save robot's score before updating coins
                 bool utilGoesUpInSuccessorState = false;
                 int scoreMaxBeforeUpdatingCoins = adaptedRobots[topOfTreeTeamId].coinNb;
+
+                //adapt the coins on ground in successor state only if we find a coin on the robot's next location
+                list<int> adaptedCoinsOnGround = this->coinsOnGround;
                 updateCoins(&adaptedCoinsOnGround, &(adaptedRobots[i]));
 
                 //util goes up to true if score of maximizer increases
                 if (adaptedRobots[topOfTreeTeamId].coinNb > scoreMaxBeforeUpdatingCoins)
                     utilGoesUpInSuccessorState = true;
 
+                //adapt successor depth
+                int adaptedDepthOfState = this->depthOfState + 1;
+
                 //adapt time in successor state
-                int adaptedTimeSinceStartOfGame = this->timeSinceStartOfGame + 1;
+                int adaptedTimeSinceStartOfGame = this->timeSinceStartOfGame;
+                updateTime(&adaptedDepthOfState, &adaptedTimeSinceStartOfGame);
 
                 //adapt the maze if gas closing interval is reach
                 std::vector<vector <int>> successorMazeSquares = this->mazeSquares;
-                updateMaze(&successorMazeSquares);
-
-                /*
-                int narrowMazeTimeInterval = 6;
-                if (adaptedTimeSinceStartOfGame%narrowMazeTimeInterval == 0){
-                    int nbOfSquaresInTheGaz = adaptedTimeSinceStartOfGame/narrowMazeTimeInterval;
-
-                    for(int h=0; h < mazeSquares.size(); h++){
-                        //erase possible moves for first column(s) of the maze
-                        if (h < this->mazeVDim*nbOfSquaresInTheGaz)
-                            successorMazeSquares[h] = {};
-                        //erase possible moves for first line(s) of the maze
-                        else if (h%this->mazeVDim < nbOfSquaresInTheGaz)
-                            successorMazeSquares[h] = {};
-                        //erase possible moves for last line(s) of the maze
-                        else if (h%this->mazeVDim >= this->mazeVDim - nbOfSquaresInTheGaz)
-                            successorMazeSquares[h] = {};
-                        //erase possible moves for the last column(s) of the maze
-                        else if (h > this->mazeHDim*this->mazeVDim - nbOfSquaresInTheGaz*this->mazeVDim)
-                            successorMazeSquares[h] = {};
-                    }
-                }
-                */
+                updateMaze(&successorMazeSquares, adaptedTimeSinceStartOfGame);
 
                 //adapt robots if next location is in the gaz. 
                 updateRobotsLife(&successorMazeSquares, &adaptedRobots);
-
-                /*
-                //iterate on all robots (not only the one who has it's turn)
-                for (int k; k < adaptedRobots.size(); k++){
-                    //if square is empty, robot is dead
-                    if(successorMazeSquares[adaptedRobots[k].location].empty())
-                        adaptedRobots[k].isAlive = false;
-                }
-                */
 
                 //add the successor to the list of successors of current game state
                 //NOTE : next step is to create a new successor & add it to the list of successors.
                 //better do this in 2 steps. Otherwise you need to use the "new" keyword which allocates memory on the heap
                 //which is never freed. This lead to a huge amount of RAM consummed. 
-                GameState successorGameState(successorMazeSquares,this->mazeHDim,adaptedCoinsOnGround,adaptedRobots,this->depthOfState+1,(this->teamId+1)%2, utilGoesUpInSuccessorState, adaptedTimeSinceStartOfGame, this->gasClosingInterval);
+                GameState successorGameState(successorMazeSquares,this->mazeHDim,adaptedCoinsOnGround,adaptedRobots,adaptedDepthOfState,(this->teamId+1)%2, utilGoesUpInSuccessorState, adaptedTimeSinceStartOfGame, this->gasClosingInterval);
                 this->successors.push_back(successorGameState);
+                }
+
             }
+            else {
+                //under construction
+                std::cout << "WARNING : Trying to generate successors for a robot with no move possible." << endl;
+            }
+            
         }
 
         //update coins on ground (& in robot) in successor state
@@ -160,10 +146,10 @@ class GameState {
             }
         }
 
-        void updateMaze(vector<vector <int>> *pMazeSquares){
+        void updateMaze(vector<vector <int>> *pMazeSquares, int time){
             //adapt the maze if gas closing interval is reach
-            if (this->timeSinceStartOfGame%this->gasClosingInterval == 0){
-                int nbOfSquaresInTheGaz = this->timeSinceStartOfGame/gasClosingInterval;
+            if (time%this->gasClosingInterval == 0){
+                int nbOfSquaresInTheGaz = time/gasClosingInterval;
 
                 for(int h=0; h < (*pMazeSquares).size(); h++){
                     //erase possible moves for first column(s) of the maze
@@ -190,61 +176,17 @@ class GameState {
             }
         }
 
-        /*tuple<int, int> getMinimax(){
-            //default move returned is -1
-            int moveToMinimax = -1;
-            //if terminal state, return Minimax value & -1 (no next move)
-            if (this->isTerminalState()){
-                //TODO : next lines to be modified. Friendly robot is not always at index 0
-                //TODO : ask on ExoLegend Discord if coins of dead robot count in team score
-                if (this->robots[0].isAlive){
-                    //return the state utility (nb of coins gathered)
-                    return {this->robots[0].coinNb, moveToMinimax};
-                }
-                else{
-                    //if friendly robot died, terminal state utility is 0
-                    return {0, moveToMinimax};
+        void updateTime(int *depth, int *time){
+            //if both teams are alive, increase time once on two
+            if(this->robots[0].isAlive && this->robots[1].isAlive){
+                if ((*depth)%2 == 0){
+                    *time = *time + 1;
                 }
             }
-            else {
-                //if not a terminal state, need to compute successor states
-                this->generateSuccessors();
-
-                //select index of robot who has its turn
-                int i = 0*this->friendTurn + 1*(!this->friendTurn);
-
-                //if its friend's turn (maximizer) then return the value that maximizes the minimum gains of the adversary
-                if (this->friendTurn){
-                    int value = -1000;
-                    for(list<GameState>::iterator it = (this->successors).begin(); it != (this->successors).end(); it++){
-                        //NOTE : "it" is an iterator (pointer). Need to add * to access successor object value
-                        int successorMinimax = get<0>((*it).getMinimax());
-
-                        if (successorMinimax > value){
-                            value = successorMinimax;
-                            moveToMinimax = (*it).robots[i].location;
-                        }
-                    }
-                    return {value, moveToMinimax};
-                }
-
-                //if its adversary's turn (minimizer) then return the value that minimizes the maximums gains of the friend
-                else {
-                    int value = 1000;
-                    for(list<GameState>::iterator it = (this->successors).begin(); it != (this->successors).end(); it++){
-                        //NOTE : "it" is an iterator (pointer). Need to add * to access successor object value
-                        int successorMinimax = get<0>((*it).getMinimax());
-
-                        if (successorMinimax < value){
-                            value = successorMinimax;
-                            moveToMinimax = (*it).robots[i].location;
-                        }
-                    }
-                    return {value, moveToMinimax};
-                }
-            }
+            //otherwise, increase depth at each turn
+            else
+                *time = *time + 1;
         }
-        */
 
         void printGameState(){
             //TODO solve display bug
@@ -253,8 +195,10 @@ class GameState {
             string innerHWall = "-";
             string blank = " ";
             string gaz = "x";
-            string goraneRobot = "G";
-            string enemyRobot = "E";
+            string aliveGoraneRobot = "G";
+            string aliveEnemyRobot = "E";
+            string deadGoraneRobot = "g";
+            string deadEnemyRobot = "e";
             string coin = "$";
 
             //only works with a squared number of mazes
@@ -282,13 +226,19 @@ class GameState {
                             //we print Gorane if it is located in the current square
                             if (this->robots[0].location == currentSquareId){
                                 currentSquareIdShouldBeBlank = false;
-                                std::cout << goraneRobot;
+                                if(this->robots[0].isAlive)
+                                    std::cout << aliveGoraneRobot;
+                                else
+                                    std::cout << deadGoraneRobot;
                             }
                             //we print Enemy if it is located in the current square
                             //NOTE : if Enemy & Robot have same location, Gorane will be printed
                             else if(this->robots[1].location == currentSquareId){
                                 currentSquareIdShouldBeBlank = false;
-                                std::cout << enemyRobot;
+                                if(this->robots[1].isAlive)
+                                    std::cout << aliveEnemyRobot;
+                                else
+                                    std::cout << deadEnemyRobot;
                             }
                             else {
 

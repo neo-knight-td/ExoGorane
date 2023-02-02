@@ -29,11 +29,11 @@ using namespace std;
                 //return the state utility (playing team's robot coin score minus coin score of opponent robot)
                 return {gameState.getStateUtility(topOfTreeTeamId), dummyMove, depthZero, depthZero};
             }
-            //else{
-                //if friendly robot died, terminal state utility is 0
+            else{
+                //if robot died, return the same utility (under investigation what to exactly return)
                 //TODO : ask on ExoLegend Discord if coins of dead robot count in team score
-                //return {0, dummyMove, depthZero, depthZero};
-            //}
+                return {gameState.getStateUtility(topOfTreeTeamId), dummyMove, depthZero, depthZero};
+            }
         }
         
         //if state is not terminal
@@ -41,6 +41,12 @@ using namespace std;
             int value;
             int depthToMinimax;
             int depthToFirstUtilGoesUp;
+
+            //check that player who should have his turn is alive
+            if (!gameState.robots[gameState.teamId].isAlive){
+                //if not, change id of team who has it's turn
+                gameState.teamId = (gameState.teamId+1)%2;
+            }
 
             //generate the successor states from the current state
             gameState.generateSuccessors(topOfTreeTeamId);
@@ -61,11 +67,10 @@ using namespace std;
                     depth2++;
 
                     //NOTE : debug purpose only -> bug
-                    if (gameState.depthOfState == 0){//(gameState.depthOfState == 2 && gameState.robots[1].location == 23){
+                    if (gameState.depthOfState == 2){//(gameState.depthOfState == 2 && gameState.robots[1].location == 23){
                         //cout << "Hello" << endl;
                     }
-                                                         
-
+                                                        
                     //if minimax from current successor is higher, update all 4 values to return
                     if (successorMinimax > value){
                         value = successorMinimax;
@@ -100,16 +105,10 @@ using namespace std;
                     
                 }
 
-                //let's say we found the true minimax, we have to check if we don't already have that value as utility
-                //if (gameState.getStateUtility(topOfTreeTeamId) == value)
-                    //if its the case then depth should be reset
-                    //depthToMinimax = 0;//
-
-                //return {value, moveToMinimax, depthToMinimax};//
             }
 
             //if its minimizer's turn then return the value that minimizes the maximums gains of the opponent
-            else {
+            else if (gameState.teamId != topOfTreeTeamId) {
                 value = 1000;
                 depthToMinimax = -1000;
                 depthToFirstUtilGoesUp = -1000;
@@ -160,7 +159,7 @@ using namespace std;
                     if (gameState.depthOfState == 1){//(gameState.depthOfState == 2 && gameState.robots[1].location == 23){
                         //cout << "Hello" << endl;
                     }
-                }
+                } 
             }
 
             //let's say we found the true minimax, we have to check if we don't already have that value as utility (or a higher value)
@@ -172,9 +171,6 @@ using namespace std;
             if (gameState.utilGoesUp)
                 depthToFirstUtilGoesUp = 0;
 
-            //return {value, moveToMinimax, depthToMinimax};
-
-            //gameState.deleteSuccessors();
             return {value, moveToMinimax, depthToMinimax, depthToFirstUtilGoesUp};
         }
     }

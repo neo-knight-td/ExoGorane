@@ -129,18 +129,18 @@ int main()
     vector<vector <int>> mazeVector
     {
         {5,1},{0,2},{1,7,3},{2,8},{9},//column 1 of maze
-        {10,0},{11,7},{6,12,8,2},{7,13,3},{14,4},//column 2 of maze
+        {10,0,6},{11,7},{6,12,8,2},{7,13,3},{14,4},//column 2 of maze
         {15,11,5},{10,12,6},{11,17,13,7},{12,18,8},{19,9},//column 3 of maze
         {20,10},{21,17},{16,18,12},{19,17,13},{18,14},//column 4 of maze
         {15},{22,16},{21,23},{22,24},{23}//column 5 of maze
     };
     int mazeHDim = 5;
-    list<int> coinsVector = {4,9};
+    list<int> coinsVector = {4,9,12,20,15};
     Robot robotG = Robot(0, 0, true, true);
     Robot robotE = Robot(24, 0, true, false);
     vector<Robot> robotVector = {robotG, robotE};
     int maxDepth = 11;
-    int gasClosingInterval = 6;
+    int gasClosingInterval = 2;
     
     int valueOfMinimax;
     int moveToMinimax;
@@ -176,15 +176,18 @@ int main()
         simpleGameState.robots[teamId].location = moveToMinimax;
         // > coins
         simpleGameState.updateCoins(&simpleGameState.coinsOnGround, &simpleGameState.robots[teamId]);
-        // > team id
-        teamId = (teamId+1)%2;
-        simpleGameState.teamId = teamId;
-        // > time since start of the game (+1)
-        simpleGameState.timeSinceStartOfGame++;
+        // > depth
+        simpleGameState.depthOfState++;
+        // > time
+        simpleGameState.updateTime(&simpleGameState.depthOfState,&simpleGameState.timeSinceStartOfGame);
         // > maze
-        simpleGameState.updateMaze(&simpleGameState.mazeSquares);
+        simpleGameState.updateMaze(&simpleGameState.mazeSquares, simpleGameState.timeSinceStartOfGame);
         // > robot life
         simpleGameState.updateRobotsLife(&simpleGameState.mazeSquares, &simpleGameState.robots);
+        // > team id (only if robot is alive in team taking next turn)
+        if (simpleGameState.robots[(teamId+1)%2].isAlive)
+            teamId = (teamId+1)%2;
+        simpleGameState.teamId = teamId;
 
         //print game state
         simpleGameState.printGameState();
