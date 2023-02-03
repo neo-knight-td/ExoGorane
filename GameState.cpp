@@ -92,46 +92,51 @@ class GameState {
                 for(int robotNextLocation : robotNextLocations){
 
                 //adapt the robot's location in successor state
-                vector<Robot> adaptedRobots = this->robots;
-                adaptedRobots[i].location = robotNextLocation;
+                vector<Robot> successorRobots = this->robots;
+                successorRobots[i].location = robotNextLocation;
 
                 //save robot's score before updating coins
                 bool utilGoesUpInSuccessorState = false;
-                int scoreMaxBeforeUpdatingCoins = adaptedRobots[topOfTreeTeamId].coinNb;
+                int scoreMaxBeforeUpdatingCoins = successorRobots[topOfTreeTeamId].coinNb;
 
                 //adapt the coins on ground in successor state only if we find a coin on the robot's next location
-                list<int> adaptedCoinsOnGround = this->coinsOnGround;
-                updateCoins(&adaptedCoinsOnGround, &(adaptedRobots[i]));
+                list<int> successorCoinsOnGround = this->coinsOnGround;
+                updateCoins(&successorCoinsOnGround, &(successorRobots[i]));
 
                 //util goes up to true if score of maximizer increases
-                if (adaptedRobots[topOfTreeTeamId].coinNb > scoreMaxBeforeUpdatingCoins)
+                if (successorRobots[topOfTreeTeamId].coinNb > scoreMaxBeforeUpdatingCoins)
                     utilGoesUpInSuccessorState = true;
 
                 //adapt successor depth
-                int adaptedDepthOfState = this->depthOfState + 1;
+                int successorDepthOfState = this->depthOfState + 1;
 
                 //adapt time in successor state
-                int adaptedTimeSinceStartOfGame = this->timeSinceStartOfGame;
-                updateTime(&adaptedDepthOfState, &adaptedTimeSinceStartOfGame);
+                int successorTimeSinceStartOfGame = this->timeSinceStartOfGame;
+                updateTime(&successorDepthOfState, &successorTimeSinceStartOfGame);
 
                 //adapt the maze if gas closing interval is reach
                 std::vector<vector <int>> successorMazeSquares = this->mazeSquares;
-                updateMaze(&successorMazeSquares, adaptedTimeSinceStartOfGame);
+                updateMaze(&successorMazeSquares, successorTimeSinceStartOfGame);
 
                 //adapt robots if next location is in the gaz. 
-                updateRobotsLife(&successorMazeSquares, &adaptedRobots);
+                updateRobotsLife(&successorMazeSquares, &successorRobots);
+
+                //adapted team id
+                int successorTeamId = this->teamId;
+                if (successorRobots[(this->teamId+1)%2].isAlive)
+                    successorTeamId = (teamId+1)%2;   
 
                 //add the successor to the list of successors of current game state
                 //NOTE : next step is to create a new successor & add it to the list of successors.
                 //better do this in 2 steps. Otherwise you need to use the "new" keyword which allocates memory on the heap
                 //which is never freed. This lead to a huge amount of RAM consummed. 
-                GameState successorGameState(successorMazeSquares,this->mazeHDim,adaptedCoinsOnGround,adaptedRobots,adaptedDepthOfState,(this->teamId+1)%2, utilGoesUpInSuccessorState, adaptedTimeSinceStartOfGame, this->gasClosingInterval);
+                GameState successorGameState(successorMazeSquares, this->mazeHDim, successorCoinsOnGround, successorRobots, successorDepthOfState, successorTeamId, utilGoesUpInSuccessorState, successorTimeSinceStartOfGame, this->gasClosingInterval);
                 this->successors.push_back(successorGameState);
                 }
 
             }
             else {
-                //under construction
+                //under construction (this section should never be reached)
                 std::cout << "WARNING : Trying to generate successors for a robot with no move possible." << endl;
             }
             
@@ -183,7 +188,7 @@ class GameState {
                     *time = *time + 1;
                 }
             }
-            //otherwise, increase depth at each turn
+            //otherwise, increase time independently of the depth
             else
                 *time = *time + 1;
         }

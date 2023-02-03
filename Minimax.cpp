@@ -15,9 +15,8 @@ using namespace std;
 
     //getValueOfNextState is a recursive function that will explore the tree of states and return the maximum utility
     //value reachable from the current game state. It will also provide the move required to reach that value, the depth
-    //at which that value appears in the tree & the depth to the ...
+    //at which that value appears in the tree & the depth to the nearest state in which utility increases
     tuple<int, int, int, int> Minimax :: getValueOfNextState(GameState gameState, int topOfTreeTeamId){
-        int moveToMinimax;
 
         //if terminal state
         if (gameState.isTerminalState() || gameState.depthOfState >= maxDepth){
@@ -31,40 +30,36 @@ using namespace std;
             }
             else{
                 //if robot died, return the same utility (under investigation what to exactly return)
-                //TODO : ask on ExoLegend Discord if coins of dead robot count in team score
+                //TODO : ask on ExoLegend Discord if coins of dead robot count in team score --> ok, written in the rules of the game
                 return {gameState.getStateUtility(topOfTreeTeamId), dummyMove, depthZero, depthZero};
             }
         }
         
         //if state is not terminal
         else {
-            int value;
+            //initiate values to be returned
+            int minimax;
+            int moveToMinimax;
             int depthToMinimax;
             int depthToFirstUtilGoesUp;
-
-            //check that player who should have his turn is alive
-            if (!gameState.robots[gameState.teamId].isAlive){
-                //if not, change id of team who has it's turn
-                gameState.teamId = (gameState.teamId+1)%2;
-            }
 
             //generate the successor states from the current state
             gameState.generateSuccessors(topOfTreeTeamId);
 
-            //if its maximizer turn then return the value that maximizes the minimum gains of the opponent
+            //if its maximizer turn then return the minimax that maximizes the minimum gains of the opponent
             if (gameState.teamId == topOfTreeTeamId){
-                value = -1000;
-                depthToMinimax= 1000;//
+                minimax = -1000;
+                depthToMinimax= 1000;
                 depthToFirstUtilGoesUp = 1000;
                 for(list<GameState>::iterator it = (gameState.successors).begin(); it != (gameState.successors).end(); it++){
                     //NOTE : "it" is an iterator (pointer). Need to add * to access successor object value
                     int successorMinimax;
-                    int depth;
-                    int depth2;
+                    int successorDepthToMinimax;
+                    int successorDepthToFirstUtilGoesUp;
                     
-                    std::tie(successorMinimax, std::ignore, depth, depth2) = getValueOfNextState(*it, topOfTreeTeamId);
-                    depth++;
-                    depth2++;
+                    std::tie(successorMinimax, std::ignore, successorDepthToMinimax, successorDepthToFirstUtilGoesUp) = getValueOfNextState(*it, topOfTreeTeamId);
+                    successorDepthToMinimax++;
+                    successorDepthToFirstUtilGoesUp++;
 
                     //NOTE : debug purpose only -> bug
                     if (gameState.depthOfState == 2){//(gameState.depthOfState == 2 && gameState.robots[1].location == 23){
@@ -72,28 +67,28 @@ using namespace std;
                     }
                                                         
                     //if minimax from current successor is higher, update all 4 values to return
-                    if (successorMinimax > value){
-                        value = successorMinimax;
+                    if (successorMinimax > minimax){
+                        minimax = successorMinimax;
                         moveToMinimax = (*it).robots[gameState.teamId].location;
-                        depthToMinimax = depth;//
-                        depthToFirstUtilGoesUp = depth2;
+                        depthToMinimax = successorDepthToMinimax;//
+                        depthToFirstUtilGoesUp = successorDepthToFirstUtilGoesUp;
                     }
-                    //if 2 successors lead to same minimax value
-                    else if (successorMinimax == value){
+                    //if 2 successors lead to same minimax minimax
+                    else if (successorMinimax == minimax){
                         //check if depth to minimax from current successor is smaller
-                        if (depth < depthToMinimax){
+                        if (successorDepthToMinimax < depthToMinimax){
                             //if its the case then update move & depth. This allows to reach faster the same minimax value
                             moveToMinimax = (*it).robots[gameState.teamId].location;
-                            depthToMinimax = depth;//
-                            depthToFirstUtilGoesUp = depth2;
+                            depthToMinimax = successorDepthToMinimax;//
+                            depthToFirstUtilGoesUp = successorDepthToFirstUtilGoesUp;
                         }
 
                         //check if depth are the same
-                        else if (depth == depthToMinimax) {
-                            //update move to minimax only if depth to first utilility goes up in current successor state is smaller
-                            if (depth2 < depthToFirstUtilGoesUp){
+                        else if (successorDepthToMinimax == depthToMinimax) {
+                            //update move to minimax only if depth to first utility goes up in current successor state is smaller
+                            if (successorDepthToFirstUtilGoesUp < depthToFirstUtilGoesUp){
                                 moveToMinimax = (*it).robots[gameState.teamId].location;
-                                depthToFirstUtilGoesUp = depth2;
+                                depthToFirstUtilGoesUp = successorDepthToFirstUtilGoesUp;
                             }
                         }
                     }
@@ -109,19 +104,19 @@ using namespace std;
 
             //if its minimizer's turn then return the value that minimizes the maximums gains of the opponent
             else if (gameState.teamId != topOfTreeTeamId) {
-                value = 1000;
+                minimax = 1000;
                 depthToMinimax = -1000;
                 depthToFirstUtilGoesUp = -1000;
                 
                 for(list<GameState>::iterator it = (gameState.successors).begin(); it != (gameState.successors).end(); it++){
                     //NOTE : "it" is an iterator (pointer). Need to add * to access successor object value
                     int successorMinimax;
-                    int depth;
-                    int depth2;
+                    int successorDepthToMinimax;
+                    int successorDepthToFirstUtilGoesUp;
 
-                    std::tie(successorMinimax, std::ignore, depth, depth2) = getValueOfNextState(*it, topOfTreeTeamId);
-                    depth++;
-                    depth2++;
+                    std::tie(successorMinimax, std::ignore, successorDepthToMinimax, successorDepthToFirstUtilGoesUp) = getValueOfNextState(*it, topOfTreeTeamId);
+                    successorDepthToMinimax++;
+                    successorDepthToFirstUtilGoesUp++;
 
                     //NOTE : debug purpose only                    
                     if (gameState.depthOfState == 1){//(gameState.depthOfState == 2 && gameState.robots[1].location == 23){
@@ -129,28 +124,28 @@ using namespace std;
                     }
 
                     //if minimax from current successor is lower, update all 4 values to return
-                    if (successorMinimax < value){
-                        value = successorMinimax;
+                    if (successorMinimax < minimax){
+                        minimax = successorMinimax;
                         moveToMinimax = (*it).robots[gameState.teamId].location;
-                        depthToMinimax = depth;
-                        depthToFirstUtilGoesUp = depth2;
+                        depthToMinimax = successorDepthToMinimax;
+                        depthToFirstUtilGoesUp = successorDepthToFirstUtilGoesUp;
                     }
                     
                     //if 2 successors lead to same minimax value
-                    else if (successorMinimax == value){
+                    else if (successorMinimax == minimax){
                         //check if depth to minimax from current successor is bigger. This allows maximizer to reach its minimax slower 
-                        if (depth > depthToMinimax){
+                        if (successorDepthToMinimax > depthToMinimax){
                             moveToMinimax = (*it).robots[gameState.teamId].location;
-                            depthToMinimax = depth;
-                            depthToFirstUtilGoesUp = depth2;
+                            depthToMinimax = successorDepthToMinimax;
+                            depthToFirstUtilGoesUp = successorDepthToFirstUtilGoesUp;
                         }
 
                         //check if depth are the same
-                        else if (depth == depthToMinimax) {
+                        else if (successorDepthToMinimax == depthToMinimax) {
                             //update move to minimax only if depth to first utilility goes up in current successor state is bigger
-                            if (depth2 > depthToFirstUtilGoesUp){
+                            if (successorDepthToFirstUtilGoesUp > depthToFirstUtilGoesUp){
                                 moveToMinimax = (*it).robots[gameState.teamId].location;
-                                depthToFirstUtilGoesUp = depth2;
+                                depthToFirstUtilGoesUp = successorDepthToFirstUtilGoesUp;
                             }
                         }
                     }
@@ -162,8 +157,8 @@ using namespace std;
                 } 
             }
 
-            //let's say we found the true minimax, we have to check if we don't already have that value as utility (or a higher value)
-            if (gameState.getStateUtility(topOfTreeTeamId) >= value)
+            //check if we don't already have the minimax as utility (or a higher value)
+            if (gameState.getStateUtility(topOfTreeTeamId) >= minimax)
                 //if its the case then depth should be reset
                 depthToMinimax = 0;
             
@@ -171,6 +166,6 @@ using namespace std;
             if (gameState.utilGoesUp)
                 depthToFirstUtilGoesUp = 0;
 
-            return {value, moveToMinimax, depthToMinimax, depthToFirstUtilGoesUp};
+            return {minimax, moveToMinimax, depthToMinimax, depthToFirstUtilGoesUp};
         }
     }
