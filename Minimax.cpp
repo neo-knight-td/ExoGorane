@@ -15,23 +15,28 @@ using namespace std;
 
     //getValueOfNextState is a recursive function that will explore the tree of states and return the maximum utility
     //value reachable from the current game state. It will also provide the move required to reach that value, the depth
-    //at which that value appears in the tree & the depth to the nearest state in which utility increases
-    tuple<int, int, int, int> Minimax :: getValueOfNextState(GameState gameState, int topOfTreeTeamId){
+    //at which that value appears in the tree, the depth at which utility increases & the depth to the death of the robot
+    tuple<int, int, int, int, int> Minimax :: getValueOfNextState(GameState gameState, int topOfTreeTeamId){
 
         //if terminal state
         if (gameState.isTerminalState() || gameState.depthOfState >= maxDepth){
             int depthZero = 0;
+            int depthUtilGoesUp = DUMMY_DEPTH;
             int dummyMove = -1;
+
+            //if utility goes up in this state, set it to 0, otherwise leave it to dummy value
+            if (gameState.utilGoesUp)
+                depthUtilGoesUp = 0;
             
             //if playing team's robot is alive
             if (gameState.robots[topOfTreeTeamId].isAlive){
                 //return the state utility (playing team's robot coin score minus coin score of opponent robot)
-                return {gameState.getStateUtility(topOfTreeTeamId), dummyMove, depthZero, depthZero};
+                return {gameState.getStateUtility(topOfTreeTeamId), dummyMove, depthZero, depthUtilGoesUp, depthZero};
             }
             else{
                 //if robot died, return the same utility (under investigation what to exactly return)
                 //TODO : ask on ExoLegend Discord if coins of dead robot count in team score --> ok, written in the rules of the game
-                return {gameState.getStateUtility(topOfTreeTeamId), dummyMove, depthZero, depthZero};
+                return {gameState.getStateUtility(topOfTreeTeamId), dummyMove, depthZero, depthUtilGoesUp, depthZero};
             }
         }
         
@@ -42,6 +47,7 @@ using namespace std;
             int moveToMinimax;
             int depthToMinimax;
             int depthToFirstUtilGoesUp;
+            int depthToDeath;
 
             //generate the successor states from the current state
             gameState.generateSuccessors(topOfTreeTeamId);
@@ -51,18 +57,23 @@ using namespace std;
                 minimax = -1000;
                 depthToMinimax= 1000;
                 depthToFirstUtilGoesUp = 1000;
+                depthToDeath = -1000;
                 for(list<GameState>::iterator it = (gameState.successors).begin(); it != (gameState.successors).end(); it++){
                     //NOTE : "it" is an iterator (pointer). Need to add * to access successor object value
                     int successorMinimax;
                     int successorDepthToMinimax;
                     int successorDepthToFirstUtilGoesUp;
+                    int successordepthToDeath;
                     
-                    std::tie(successorMinimax, std::ignore, successorDepthToMinimax, successorDepthToFirstUtilGoesUp) = getValueOfNextState(*it, topOfTreeTeamId);
+                    std::tie(successorMinimax, std::ignore, successorDepthToMinimax, successorDepthToFirstUtilGoesUp, successordepthToDeath) = getValueOfNextState(*it, topOfTreeTeamId);
                     successorDepthToMinimax++;
-                    successorDepthToFirstUtilGoesUp++;
+                    if (successorDepthToFirstUtilGoesUp!=DUMMY_DEPTH)
+                        successorDepthToFirstUtilGoesUp++;
+                    //if (gameState.robots[topOfTreeTeamId].isAlive)
+                    successordepthToDeath++;
 
                     //NOTE : debug purpose only -> bug
-                    if (gameState.depthOfState == 2){//(gameState.depthOfState == 2 && gameState.robots[1].location == 23){
+                    if (gameState.depthOfState == 0){//(gameState.depthOfState == 2 && gameState.robots[1].location == 23){
                         //cout << "Hello" << endl;
                     }
                                                         
@@ -72,23 +83,41 @@ using namespace std;
                         moveToMinimax = (*it).robots[gameState.teamId].location;
                         depthToMinimax = successorDepthToMinimax;//
                         depthToFirstUtilGoesUp = successorDepthToFirstUtilGoesUp;
+                        depthToDeath = successordepthToDeath;
                     }
                     //if 2 successors lead to same minimax minimax
                     else if (successorMinimax == minimax){
-                        //check if depth to minimax from current successor is smaller
-                        if (successorDepthToMinimax < depthToMinimax){
-                            //if its the case then update move & depth. This allows to reach faster the same minimax value
+                        //check if depth to minimax from current successor is smaller and that maximizer robot is alive in successor state
+                        //indeed, we want to reach the minimax value as soon as possible, except if this implies to commit suicide
+                        if (successordepthToDeath > depthToDeath){// invert in min
+                        //if (successorDepthToMinimax < depthToMinimax){//} && (*it).robots[topOfTreeTeamId].isAlive){
+                            //if its the case then update the 3 values. This allows to reach faster the same minimax value
                             moveToMinimax = (*it).robots[gameState.teamId].location;
                             depthToMinimax = successorDepthToMinimax;//
                             depthToFirstUtilGoesUp = successorDepthToFirstUtilGoesUp;
+                            depthToDeath = successordepthToDeath;
                         }
 
                         //check if depth are the same
-                        else if (successorDepthToMinimax == depthToMinimax) {
-                            //update move to minimax only if depth to first utility goes up in current successor state is smaller
-                            if (successorDepthToFirstUtilGoesUp < depthToFirstUtilGoesUp){
+                        else if (successordepthToDeath == depthToDeath){
+                        //else if (successorDepthToMinimax == depthToMinimax) {
+                            //TODO : check depth to robot alive
+                            //if (successordepthToDeath > depthToDeath){
+                            if (successorDepthToMinimax < depthToMinimax){// invert in min
                                 moveToMinimax = (*it).robots[gameState.teamId].location;
                                 depthToFirstUtilGoesUp = successorDepthToFirstUtilGoesUp;
+                                //depthToDeath = successordepthToDeath;
+                                depthToMinimax = successorDepthToMinimax;
+                            }
+
+                            //else if (successordepthToDeath == depthToDeath){
+                            else if (successorDepthToMinimax == successorDepthToMinimax){
+                                //update move to minimax only if depth to first utility goes up in current successor state is smaller
+                                if (successorDepthToFirstUtilGoesUp < depthToFirstUtilGoesUp && successorDepthToFirstUtilGoesUp != DUMMY_DEPTH){// invert in min
+                                    moveToMinimax = (*it).robots[gameState.teamId].location;
+                                    depthToFirstUtilGoesUp = successorDepthToFirstUtilGoesUp;
+                                }
+
                             }
                         }
                     }
@@ -107,49 +136,72 @@ using namespace std;
                 minimax = 1000;
                 depthToMinimax = -1000;
                 depthToFirstUtilGoesUp = -1000;
+                depthToDeath = 1000;
                 
                 for(list<GameState>::iterator it = (gameState.successors).begin(); it != (gameState.successors).end(); it++){
                     //NOTE : "it" is an iterator (pointer). Need to add * to access successor object value
                     int successorMinimax;
                     int successorDepthToMinimax;
                     int successorDepthToFirstUtilGoesUp;
+                    int successordepthToDeath;
 
-                    std::tie(successorMinimax, std::ignore, successorDepthToMinimax, successorDepthToFirstUtilGoesUp) = getValueOfNextState(*it, topOfTreeTeamId);
+                    std::tie(successorMinimax, std::ignore, successorDepthToMinimax, successorDepthToFirstUtilGoesUp, successordepthToDeath) = getValueOfNextState(*it, topOfTreeTeamId);
                     successorDepthToMinimax++;
-                    successorDepthToFirstUtilGoesUp++;
+                    if (successorDepthToFirstUtilGoesUp!=DUMMY_DEPTH)
+                        successorDepthToFirstUtilGoesUp++;
+                    //if (gameState.robots[topOfTreeTeamId].isAlive)
+                    successordepthToDeath++;
 
                     //NOTE : debug purpose only                    
                     if (gameState.depthOfState == 1){//(gameState.depthOfState == 2 && gameState.robots[1].location == 23){
                         //cout << "Hello" << endl;
                     }
 
-                    //if minimax from current successor is lower, update all 4 values to return
+                    //if minimax from current successor is lower, update all 5 values to return
                     if (successorMinimax < minimax){
                         minimax = successorMinimax;
                         moveToMinimax = (*it).robots[gameState.teamId].location;
                         depthToMinimax = successorDepthToMinimax;
                         depthToFirstUtilGoesUp = successorDepthToFirstUtilGoesUp;
+                        depthToDeath = successordepthToDeath;
                     }
                     
-                    //if 2 successors lead to same minimax value
+                    //if 2 successors lead to same minimax minimax
                     else if (successorMinimax == minimax){
-                        //check if depth to minimax from current successor is bigger. This allows maximizer to reach its minimax slower 
-                        if (successorDepthToMinimax > depthToMinimax){
+                        //check if depth to minimax from current successor is smaller and that maximizer robot is alive in successor state
+                        //indeed, we want to reach the minimax value as soon as possible, except if this implies to commit suicide
+                        if (successordepthToDeath < depthToDeath){
+                        //if (successorDepthToMinimax < depthToMinimax){//} && (*it).robots[topOfTreeTeamId].isAlive){
+                            //if its the case then update the 3 values. This allows to reach faster the same minimax value
                             moveToMinimax = (*it).robots[gameState.teamId].location;
-                            depthToMinimax = successorDepthToMinimax;
+                            depthToMinimax = successorDepthToMinimax;//
                             depthToFirstUtilGoesUp = successorDepthToFirstUtilGoesUp;
+                            depthToDeath = successordepthToDeath;
                         }
 
                         //check if depth are the same
-                        else if (successorDepthToMinimax == depthToMinimax) {
-                            //update move to minimax only if depth to first utilility goes up in current successor state is bigger
-                            if (successorDepthToFirstUtilGoesUp > depthToFirstUtilGoesUp){
+                        else if (successordepthToDeath == depthToDeath){
+                        //else if (successorDepthToMinimax == depthToMinimax) {
+                            //TODO : check depth to robot alive
+                            //if (successordepthToDeath > depthToDeath){
+                            if (successorDepthToMinimax > depthToMinimax){
                                 moveToMinimax = (*it).robots[gameState.teamId].location;
                                 depthToFirstUtilGoesUp = successorDepthToFirstUtilGoesUp;
+                                //depthToDeath = successordepthToDeath;
+                                depthToMinimax = successorDepthToMinimax;
+                            }
+
+                            //else if (successordepthToDeath == depthToDeath){
+                            else if (successorDepthToMinimax == successorDepthToMinimax){
+                                //update move to minimax only if depth to first utility goes up in current successor state is smaller
+                                if (successorDepthToFirstUtilGoesUp > depthToFirstUtilGoesUp && successorDepthToFirstUtilGoesUp != DUMMY_DEPTH){
+                                    moveToMinimax = (*it).robots[gameState.teamId].location;
+                                    depthToFirstUtilGoesUp = successorDepthToFirstUtilGoesUp;
+                                }
+
                             }
                         }
                     }
-
                     //NOTE : debug purpose only                    
                     if (gameState.depthOfState == 1){//(gameState.depthOfState == 2 && gameState.robots[1].location == 23){
                         //cout << "Hello" << endl;
@@ -162,10 +214,13 @@ using namespace std;
                 //if its the case then depth should be reset
                 depthToMinimax = 0;
             
-            //if utility goes up in this state, reset variable to 0
+            //if utility goes up in this state, initiate value to 0
             if (gameState.utilGoesUp)
                 depthToFirstUtilGoesUp = 0;
 
-            return {minimax, moveToMinimax, depthToMinimax, depthToFirstUtilGoesUp};
+            if (!gameState.robots[topOfTreeTeamId].isAlive)
+                depthToDeath = 0;
+
+            return {minimax, moveToMinimax, depthToMinimax, depthToFirstUtilGoesUp, depthToDeath};
         }
     }

@@ -126,21 +126,25 @@ int main()
 
     //Example 5 : 5 x 5 maze with
 
+    //gas is closing after 4 moves. G has two options once reaching square 10. Either pursue the 2 coins on
+    //the right or grab the coin in the middle of the maze. Getting down is the best option to chose as it allows
+    //staying alive longer (and maybe see coins that were further away than the max depth).
+
     vector<vector <int>> mazeVector
     {
         {5,1},{0,2},{1,7,3},{2,8},{9},//column 1 of maze
-        {10,0,6},{11,7},{6,12,8,2},{7,13,3},{14,4},//column 2 of maze
+        {0,10},{11,7},{6,12,8,2},{7,13,3},{14,4},//column 2 of maze
         {15,11,5},{10,12,6},{11,17,13,7},{12,18,8},{19,9},//column 3 of maze
         {20,10},{21,17},{16,18,12},{19,17,13},{18,14},//column 4 of maze
         {15},{22,16},{21,23},{22,24},{23}//column 5 of maze
     };
     int mazeHDim = 5;
-    list<int> coinsVector = {4,9,12,20,15};
+    list<int> coinsVector = {4,9,20,15,12};
     Robot robotG = Robot(0, 0, true, true);
     Robot robotE = Robot(24, 0, true, false);
     vector<Robot> robotVector = {robotG, robotE};
     int maxDepth = 11;
-    int gasClosingInterval = 2;
+    int gasClosingInterval = 4;
     
     int valueOfMinimax;
     int moveToMinimax;
@@ -150,6 +154,9 @@ int main()
 
     //time at start of the game
     int startTime = 0;
+
+    //current depth
+    int depth = 0;
     vector<string> teamNames = {"Goranes", "Enemy"};
 
     GameState simpleGameState = GameState(mazeVector, mazeHDim, coinsVector, robotVector, 0, teamId, false, startTime, gasClosingInterval);
@@ -163,7 +170,7 @@ int main()
         auto begin = std::chrono::high_resolution_clock::now();
 
         //compute minimax value & move to minimax
-        std::tie(valueOfMinimax, moveToMinimax, std::ignore, std::ignore) = minimaxStrategy.getValueOfNextState(simpleGameState, teamId);
+        std::tie(valueOfMinimax, moveToMinimax, std::ignore, std::ignore, std::ignore) = minimaxStrategy.getValueOfNextState(simpleGameState, teamId);
 
         auto end = std::chrono::high_resolution_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - begin);
@@ -177,9 +184,9 @@ int main()
         // > coins
         simpleGameState.updateCoins(&simpleGameState.coinsOnGround, &simpleGameState.robots[teamId]);
         // > depth
-        simpleGameState.depthOfState++;
+        depth++;
         // > time
-        simpleGameState.updateTime(&simpleGameState.depthOfState,&simpleGameState.timeSinceStartOfGame);
+        simpleGameState.updateTime(&depth,&simpleGameState.timeSinceStartOfGame);
         // > maze
         simpleGameState.updateMaze(&simpleGameState.mazeSquares, simpleGameState.timeSinceStartOfGame);
         // > robot life
