@@ -142,6 +142,8 @@ int main()
     //the right or grab the coin in the middle of the maze (both options lead to minimax of 1) Getting down is the best option to chose as it allows
     //staying alive longer (and maybe see coins that were further away than the max depth when in square 10).
 
+    // Corresponding code :
+
     vector<vector <int>> mazeVector
     {
         {5,1},{0,2},{1,7,3},{2,8},{9},//column 1 of maze
