@@ -124,11 +124,23 @@ int main()
     int maxDepth = 3;
     */
 
-    //Example 5 : 5 x 5 maze with
+    //Example 5 : 5 x 5 maze with 5 coins, 2 robots and the gas closing after 4 moves
 
-    //gas is closing after 4 moves. G has two options once reaching square 10. Either pursue the 2 coins on
-    //the right or grab the coin in the middle of the maze. Getting down is the best option to chose as it allows
-    //staying alive longer (and maybe see coins that were further away than the max depth).
+    //  ***********
+    //  *G     $  *
+    //  *  -   - -*
+    //  * |   |   *
+    //  *         *
+    //  *    $  | *
+    //  *         *
+    //  *       | *
+    //  *- - -    *
+    //  *$ $    |E*
+    //  ***********
+
+    //G has two options once reaching square 10. Either pursue the 2 coins on
+    //the right or grab the coin in the middle of the maze (both options lead to minimax of 1) Getting down is the best option to chose as it allows
+    //staying alive longer (and maybe see coins that were further away than the max depth when in square 10).
 
     vector<vector <int>> mazeVector
     {
