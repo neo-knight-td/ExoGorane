@@ -213,12 +213,21 @@ class GameState {
             int square_id;
 
             //first line is line of outer walls
-            for (int i=0; i < (dim_h*2 + 1);i++)
-                std::cout << outerWall;
+            //draw outer walls at tile intersections only → i+=2
+            for (int i=0; i < (dim_h*2 + 1);i+=2)
+                std::cout << outerWall << blank;
             std::cout << std::endl;
                 
             for (int i=1; i<(dim_v*2); i++){
-                std::cout << outerWall;
+                //draw outer walls at tile intersections only 
+                if (i%2==0)
+                {
+                    std::cout << outerWall;
+                }else{
+                    std::cout << blank;
+                }
+                
+                
 
                 for (int j = 0; j< (dim_h*2 + 1); j++){
                     //if i is odd, print line with square ids or vertical walls
@@ -304,12 +313,18 @@ class GameState {
                         }
                     }
                 }
-                std::cout << outerWall << std::endl;
+                if (i%2==0)
+                {
+                    std::cout << outerWall << std::endl;
+                }else{
+                    std::cout << blank << std::endl;
+                }
+                
             }
 
             //last line is line of outer walls
-            for (int i=0; i < (dim_h*2 + 1);i++)
-                std::cout << outerWall;
+            for (int i=0; i < (dim_h*2 + 1);i+=2)
+                std::cout << outerWall << blank;
             std::cout << std::endl;
         }
 };
