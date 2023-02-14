@@ -67,6 +67,14 @@ The `GameState` class also contains a vector of robots (ref `Robot` class) with 
 This file implements the minimax algorithm to a simplified maze with only 2 robots.
 
 ## Results
-Ez Win! :) 
+Ez Win! :)
+
+## Evaluation function
+terminal state : 1 or 0 depending if win or lose
+non-terminal state : function bounded between 0 & 1 and that takes as parameters :
+    coins gorane team
+    coints enemy team
+    ... think about other features !
+
 
 
