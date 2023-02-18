@@ -8,7 +8,10 @@
 #include <chrono>
 #include <numeric>
 #include "Minimax.cpp"
-#include "Constants.h"
+//--------------------------------------------------------------------------------------------
+//NOTE : make sure to include the correct constants ! It will define all the game parameters
+#include "SimpleMazeConstants.h"
+//--------------------------------------------------------------------------------------------
 
 int main()
 {
