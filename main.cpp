@@ -4,7 +4,9 @@
 #include <iterator>
 #include <list>
 #include <tuple>
-#include "Minimax.cpp"
+#include "MinimaxNode.h"
+#include "MinimaxNode.cpp"
+#include "Constants.h"
 #include <cmath>
 #include <chrono>
 
@@ -12,33 +14,33 @@ int main()
 {
     std::cout << "Hello Gorane !" << std::endl;
 
-    //  Example 1 : simplified maze (3 x 2) with 2 robots and 1 coin:
+    //  Example 1 : simplified maze (3 x 3) with 2 robots and 1 coin:
 
-    //  *****
-    //  *G  *
-    //  *   *
-    //  * | *
-    //  *   *
-    //  *$ E*
-    //  *****
 
     //  G is the Gorane robot
     //  E is the Enemy
     //  $ is a coin
 
-    //  G is only 1 square away from $ whereas E is 2 squares away from $
-    //  G should win by moving to square index 3 and capturing coin $
 
-    //  Corresponding code :
-    /*
-    vector<vector <int>> mazeVector = {{1,3},{0,2},{1,5},{0,4},{3,5},{2,4}};
-    int mazeHDim = 2;
-    list<int> coinsVector = {2};
-    Robot robotG = Robot(0, 0, true, true);
-    Robot robotE = Robot(5, 0, true, false);
-    vector<Robot> robotVector = {robotG, robotE};
-    int maxDepth = 11;
-    */
+    // New Implementation code :
+    char simpleMaze[9] =
+    {
+        {constants::COIN_MASK +  constants::RIGHT_MASK + constants::DOWN_MASK},
+        {constants::UP_MASK + constants::RIGHT_MASK + constants::DOWN_MASK},
+        {constants::UP_MASK + constants::RIGHT_MASK},
+        {constants::RIGHT_MASK + constants::DOWN_MASK + constants::LEFT_MASK},
+        {constants::UP_MASK + constants::RIGHT_MASK + constants::DOWN_MASK + constants::LEFT_MASK},
+        {constants::UP_MASK + constants::RIGHT_MASK + constants::LEFT_MASK},
+        {constants::DOWN_MASK + constants::LEFT_MASK},
+        {constants::UP_MASK + constants::DOWN_MASK + constants::LEFT_MASK},
+        {constants::UP_MASK + constants::LEFT_MASK}
+    };
+
+    struct Robot simpleRobotG = {4, 0, true};
+    struct Robot simpleRobotE = {8, 0, true};
+    Robot simpleRobots[2] = {simpleRobotE, simpleRobotG};
+    int maxDepth = 10;
+    int timeUntilGasClosing = constants::GAS_CLOSING_INTERVAL;
 
     //  Example 2 : long maze (5x2) with 2 robots and 1 coin
 
@@ -62,7 +64,7 @@ int main()
 
     //  Example 3 : bigger maze (5 x 5) with 2 robots and 3 coins:
 
-    //  ***********
+    //  ***********timeUntilGasClosing
     //  *G     $  *
     //  *  -   - -*
     //  * |   |   *
@@ -124,7 +126,7 @@ int main()
     int maxDepth = 3;
     */
 
-    //Example 5 : 5 x 5 maze with 5 coins, 2 robots and the gas closing after 4 moves
+    //Example simpleGameState5 : 5 x 5 maze with 5 coins, 2 robots and the gas closing after 4 moves
 
     //  ***********
     //  *G     $  *
@@ -144,6 +146,7 @@ int main()
 
     // Corresponding code :
 
+    /*
     vector<vector <int>> mazeVector
     {
         {5,1},{0,2},{1,7,3},{2,8},{9},//column 1 of maze
@@ -159,59 +162,49 @@ int main()
     vector<Robot> robotVector = {robotG, robotE};
     int maxDepth = 11;
     int gasClosingInterval = 4;
+    */
     
     int valueOfMinimax;
     int moveToMinimax;
 
     //id of team playing first
-    int teamId = 0;
+    bool bTeamId = constants::GORANE_TEAM;
 
     //time at start of the game
     int startTime = 0;
 
     //current depth
     int depth = 0;
-    vector<string> teamNames = {"Goranes", "Enemy"};
+    vector<string> teamNames = {"Enemy", "Goranes"};
 
-    GameState simpleGameState = GameState(mazeVector, mazeHDim, coinsVector, robotVector, 0, teamId, false, startTime, gasClosingInterval);
-    Minimax minimaxStrategy(maxDepth);
+    //init game state
+    MinimaxNode minimaxNode = MinimaxNode(simpleMaze, simpleRobots, bTeamId, timeUntilGasClosing, depth, maxDepth);
 
-    simpleGameState.printGameState();
+    minimaxNode.printNode();
 
-    while (!simpleGameState.isTerminalState())
+    while (!minimaxNode.isTerminal())
     {
-        std:cout << "Turn to " << teamNames[teamId] << " team." << endl;
+        std:cout << "Turn to " << teamNames[minimaxNode.teamTakingItsTurn] << " team." << endl;
         auto begin = std::chrono::high_resolution_clock::now();
 
         //compute minimax value & move to minimax
-        std::tie(valueOfMinimax, moveToMinimax, std::ignore, std::ignore, std::ignore) = minimaxStrategy.getValueOfNextState(simpleGameState, teamId);
-
+        std::tie(valueOfMinimax, moveToMinimax, std::ignore) = minimaxNode.getMinimax();
+        
         auto end = std::chrono::high_resolution_clock::now();
-        auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - begin);
+        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
 
-        std::cout << "Robot " << teamNames[teamId] << " should move to "<< moveToMinimax << "." << std::endl;
-        printf("Time measured: %.3f microseconds.\n", elapsed.count()* 1e-3);
+        std::cout << "Robot " << teamNames[minimaxNode.teamTakingItsTurn] << " should move to "<< moveToMinimax << "." << std::endl;
+        std::cout << "Computing time was " << elapsed.count() << " milliseconds" << endl;
 
-        //update game state
-        // > robot location
-        simpleGameState.robots[teamId].location = moveToMinimax;
-        // > coins
-        simpleGameState.updateCoins(&simpleGameState.coinsOnGround, &simpleGameState.robots[teamId]);
-        // > depth
-        depth++;
-        // > time
-        simpleGameState.updateTime(&depth,&simpleGameState.timeSinceStartOfGame);
-        // > maze
-        simpleGameState.updateMaze(&simpleGameState.mazeSquares, simpleGameState.timeSinceStartOfGame);
-        // > robot life
-        simpleGameState.updateRobotsLife(&simpleGameState.mazeSquares, &simpleGameState.robots);
-        // > team id (only if robot is alive in team taking next turn)
-        if (simpleGameState.robots[(teamId+1)%2].isAlive)
-            teamId = (teamId+1)%2;
-        simpleGameState.teamId = teamId;
+        //update node
+        minimaxNode.configureRobotsLocationInChildNode(minimaxNode.robots, moveToMinimax);
+        minimaxNode.configureCoinsInChildNode(minimaxNode.maze, minimaxNode.robots);
+        minimaxNode.configureGasInChildNode(minimaxNode.maze, &timeUntilGasClosing);
+        minimaxNode.configureRobotsLivesInChildNode(minimaxNode.maze, minimaxNode.robots);
+        minimaxNode.configureTeamInChildNode(minimaxNode.robots, &minimaxNode.teamTakingItsTurn);
 
-        //print game state
-        simpleGameState.printGameState();
+        //print new node
+        minimaxNode.printNode();
     }
 
     std::cout << "Game Over" << endl;

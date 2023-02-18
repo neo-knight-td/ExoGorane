@@ -207,7 +207,8 @@ void MinimaxNode :: selectFromChildren(std::function<bool(int,int)> comparatorGr
         double successorMinimax;
         int successorDepthToMinimax;
 
-        MinimaxNode childNode = generateMinimaxNode(getLocationIncrement(&childIndex));
+        int locationIncrement = getLocationIncrement(&childIndex);
+        MinimaxNode childNode = generateMinimaxNode(locationIncrement);
         std::tie(successorMinimax, std::ignore, successorDepthToMinimax) = childNode.getMinimax();
         successorDepthToMinimax++;
 
@@ -219,14 +220,14 @@ void MinimaxNode :: selectFromChildren(std::function<bool(int,int)> comparatorGr
         //if minimax from current successor is higher, update all values to return
         if (comparatorGreaterLesser(successorMinimax,*minimax)){
             *minimax = successorMinimax;
-            *moveToMinimax = childNode.robots[this->teamTakingItsTurn].location;
+            *moveToMinimax = locationIncrement;
             *depthToMinimax = successorDepthToMinimax;
         }
         //if 2 successors lead to same minimax
         else if (successorMinimax == *minimax){
             //only update if current child node leads to minimax faster (if depth is smaller)
             if (comparatorLesserGreater(successorDepthToMinimax, *depthToMinimax)){
-                *moveToMinimax = childNode.robots[this->teamTakingItsTurn].location;
+                *moveToMinimax = locationIncrement;
                 *depthToMinimax = successorDepthToMinimax;
             }
         }

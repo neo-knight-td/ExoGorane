@@ -49,10 +49,9 @@ int main()
 
     //current depth
     int depth = 0;
-    vector<string> teamNames = {"Goranes", "Enemy"};
 
     int counter = 0;
-    int counterLimit = 100;
+    int counterLimit = 1;
     vector<int> cpuTimes;
 
     //init game state
