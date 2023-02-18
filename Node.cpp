@@ -11,9 +11,12 @@ using namespace std;
         for (int i=0; i< constants::NB_OF_MAZE_SQUARES; i++)
             this->maze[i] = paramMaze[i];
         //copy robots
-        for (int j=0; j < constants::NB_OF_ROBOTS; j++)
+        for (int j=0; j < constants::NB_OF_ROBOTS; j++){
             this->robots[j] = paramRobots[j];
-        
+            if (this->robots[j].location >= constants::NB_OF_MAZE_SQUARES)
+                cout << "ERROR : trying to initiate robot outside the maze" << endl;
+        }
+            
         this->teamTakingItsTurn = paramTeamTakingItsTurn;
         this->timeUntilGasClosing = paramTimeUntilGasClosing;
         countCoinsOnGround();
@@ -30,6 +33,7 @@ using namespace std;
         if (childMaze[childRobots[this->teamTakingItsTurn].location] & constants::COIN_MASK){
             childRobots[this->teamTakingItsTurn].coinNb += 1;
             childMaze[childRobots[this->teamTakingItsTurn].location] += -constants::COIN_MASK;
+            countCoinsOnGround();
         }
     }
 
@@ -59,7 +63,7 @@ using namespace std;
         //adapt team in successor state only if other team robots are alive
         *childTeamTakingItsTurn = this->teamTakingItsTurn;
         if (childRobots[!(this->teamTakingItsTurn)].isAlive){
-            bool childTeamTakingItsTurn = !(this->teamTakingItsTurn);
+            *childTeamTakingItsTurn = !(this->teamTakingItsTurn);
         }
     }
 
@@ -97,12 +101,12 @@ using namespace std;
         //TODO : add default child (child index 0)
         if(*childIndex <= 0 && (mazeSquare & constants::UP_MASK)){
             *childIndex = 1;
-            return 1;
+            return -1;
         }
             
         if(*childIndex <= 1 && (mazeSquare & constants::DOWN_MASK)){
             *childIndex = 2;
-            return -1;
+            return 1;
         }
             
         if(*childIndex <= 2 && (mazeSquare & constants::LEFT_MASK)){
