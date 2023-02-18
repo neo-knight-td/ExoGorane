@@ -1,3 +1,7 @@
+//--------------------------------------------------------------------------------------------
+//NOTE : make sure to include the correct constants ! It will define all the game parameters.
+#include "SimpleMazeConstants.h"
+//--------------------------------------------------------------------------------------------
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -9,35 +13,23 @@
 #include <numeric>
 #include "MinimaxNode.h"
 #include "MinimaxNode.cpp"
-#include "Constants.h"
 
 int main()
 {
     std::cout << "Hello Tester !" << std::endl;
 
+    //retrieve all game parameters from constant file
+    char simpleMaze[constants::NB_OF_MAZE_SQUARES];
+    for (int i = 0; i < constants::NB_OF_MAZE_SQUARES; i++)
+        simpleMaze[i] = constants::MAZE[i];
+    struct Robot simpleRobotG = {constants::GORANE_DEFAULT_LOCATION, 0, true};
+    struct Robot simpleRobotE = {constants::ENEMY_DEFAULT_LOCATION, 0, true};
+    Robot simpleRobots[constants::NB_OF_ROBOTS];
+    simpleRobots[constants::GORANE_TEAM] = simpleRobotG;
+    simpleRobots[constants::ENEMY_TEAM] = simpleRobotE;
+    int timeUntilGasClosing = constants::GAS_CLOSING_INTERVAL;
     int maxDepth = 10;
-    int gasClosingInterval = constants::GAS_CLOSING_INTERVAL;
-
-    //Node Object
     
-    char simpleMaze[9] =
-    {
-        {constants::COIN_MASK + constants::RIGHT_MASK + constants::DOWN_MASK},
-        {constants::UP_MASK + constants::RIGHT_MASK + constants::DOWN_MASK},
-        {constants::UP_MASK + constants::RIGHT_MASK},
-        {constants::RIGHT_MASK + constants::DOWN_MASK + constants::LEFT_MASK},
-        {constants::UP_MASK + constants::RIGHT_MASK + constants::DOWN_MASK + constants::LEFT_MASK},
-        {constants::UP_MASK + constants::RIGHT_MASK + constants::LEFT_MASK},
-        {constants::DOWN_MASK + constants::LEFT_MASK},
-        {constants::UP_MASK + constants::DOWN_MASK + constants::LEFT_MASK},
-        {constants::UP_MASK + constants::LEFT_MASK}
-    };
-
-    struct Robot simpleRobotG = {4, 0, true};
-    struct Robot simpleRobotE = {8, 0, true};
-    Robot simpleRobots[2] = {simpleRobotE, simpleRobotG};
-    
-
     int valueOfMinimax;
     int moveToMinimax;
 
@@ -55,7 +47,7 @@ int main()
     vector<int> cpuTimes;
 
     //init game state
-    MinimaxNode testMinimaxNode = MinimaxNode(simpleMaze, simpleRobots, bTeamId, gasClosingInterval, depth, maxDepth);
+    MinimaxNode testMinimaxNode = MinimaxNode(simpleMaze, simpleRobots, bTeamId, timeUntilGasClosing, depth, maxDepth);
 
     while (counter < counterLimit)
     {
@@ -76,6 +68,7 @@ int main()
 
     int sum_of_elems = std::accumulate(cpuTimes.begin(), cpuTimes.end(), 0);
 
+    //average computing time is 8 ms on Thomas Desktop
     std::cout << "Average Computing time equals " << sum_of_elems/cpuTimes.size() << " milliseconds." << endl;
     
 }

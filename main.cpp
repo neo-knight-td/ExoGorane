@@ -1,3 +1,7 @@
+//--------------------------------------------------------------------------------------------
+//NOTE : make sure to include the correct constants ! It will define all the game parameters
+#include "SimpleMazeConstants.h"
+//--------------------------------------------------------------------------------------------
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -6,7 +10,6 @@
 #include <tuple>
 #include "MinimaxNode.h"
 #include "MinimaxNode.cpp"
-#include "Constants.h"
 #include <cmath>
 #include <chrono>
 
@@ -14,36 +17,19 @@ int main()
 {
     std::cout << "Hello Gorane !" << std::endl;
 
-    //  Example 1 : simplified maze (3 x 3) with 2 robots and 1 coin:
-
-
-    //  G is the Gorane robot
-    //  E is the Enemy
-    //  $ is a coin
-
-
-    // New Implementation code :
-    char simpleMaze[9] =
-    {
-        {constants::COIN_MASK +  constants::RIGHT_MASK + constants::DOWN_MASK},
-        {constants::UP_MASK + constants::RIGHT_MASK + constants::DOWN_MASK},
-        {constants::UP_MASK + constants::RIGHT_MASK},
-        {constants::RIGHT_MASK + constants::DOWN_MASK + constants::LEFT_MASK},
-        {constants::UP_MASK + constants::RIGHT_MASK + constants::DOWN_MASK + constants::LEFT_MASK},
-        {constants::UP_MASK + constants::RIGHT_MASK + constants::LEFT_MASK},
-        {constants::DOWN_MASK + constants::LEFT_MASK},
-        {constants::UP_MASK + constants::DOWN_MASK + constants::LEFT_MASK},
-        {constants::UP_MASK + constants::LEFT_MASK}
-    };
-
-    struct Robot simpleRobotG = {4, 0, true};
-    struct Robot simpleRobotE = {8, 0, true};
-    Robot simpleRobots[2] = {simpleRobotE, simpleRobotG};
-    int maxDepth = 10;
+    //retrieve all game parameters from constant file
+    char simpleMaze[constants::NB_OF_MAZE_SQUARES];
+    for (int i = 0; i < constants::NB_OF_MAZE_SQUARES; i++)
+        simpleMaze[i] = constants::MAZE[i];
+    struct Robot simpleRobotG = {constants::GORANE_DEFAULT_LOCATION, 0, true};
+    struct Robot simpleRobotE = {constants::ENEMY_DEFAULT_LOCATION, 0, true};
+    Robot simpleRobots[constants::NB_OF_ROBOTS];
+    simpleRobots[constants::GORANE_TEAM] = simpleRobotG;
+    simpleRobots[constants::ENEMY_TEAM] = simpleRobotE;
     int timeUntilGasClosing = constants::GAS_CLOSING_INTERVAL;
+    int maxDepth = 10;
 
     //  Example 2 : long maze (5x2) with 2 robots and 1 coin
-
 
     //  G should go down
     //  Corresponding code :
@@ -64,20 +50,20 @@ int main()
 
     //  Example 3 : bigger maze (5 x 5) with 2 robots and 3 coins:
 
-    //  ***********timeUntilGasClosing
-    //  *G     $  *
+    //  ***********
+    //   G     $  *
     //  *  -   - -*
-    //  * |   |   *
+    //    |   |   *
     //  *         *
-    //  *       | *
+    //          | *
     //  *         *
-    //  *       | *
+    //          | *
     //  *- - -    *
-    //  *    $ $|E*
+    //       $ $|E*
     //  ***********
 
     // G only way to win is to pursue coin closest to E first ($ in square 19)
-    
+
     // Corresponding code :
     /*
     vector<vector <int>> mazeVector

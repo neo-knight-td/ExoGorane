@@ -73,6 +73,7 @@ int main()
 
     int sum_of_elems = std::accumulate(cpuTimes.begin(), cpuTimes.end(), 0);
 
+    //average computing time is 450 ms on Thomas Desktop
     std::cout << "Average Computing time equals " << sum_of_elems/cpuTimes.size() << " milliseconds." << endl;
     
 }
