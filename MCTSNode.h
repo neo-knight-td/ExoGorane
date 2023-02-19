@@ -13,14 +13,15 @@ class MCTSNode: public Node {
         //constructor for MCTSNode
         MCTSNode(char *paramMaze, Robot *paramRobots, bool paramTeamTakingItsTurn, int paramTimeUntilGasClosing);
         //TODO : create a destructor !
+        ~MCTSNode();
         //returns the best child node from current node based on MCTS algorithm
         tuple<double, int> runMCTS(int iterations);
         //searches the tree using MCTS algorithm
-        void searchTree();
+        void search();
         //selects one child node from current node based on UCB
         void selectFromChildren();
         //expands node from the current node
-        void generateChildren();
+        void generateDescendance();
         //simulate a game until bottom of the tree and record outcome
         bool simulate();
         //generate an MCTS node

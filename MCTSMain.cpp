@@ -44,7 +44,8 @@ int main()
     MCTSNode mctsNode = MCTSNode(simpleMaze,simpleRobots,bTeamId,timeUntilGasClosing);
     
     bool result = mctsNode.simulate();
-    mctsNode.generateChildren();
+    mctsNode.generateDescendance();
+    mctsNode.selectFromChildren();
 
     /*
 

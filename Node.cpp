@@ -91,7 +91,7 @@ using namespace std;
         return descendanceSize;
     }
     
-    //this function return the next location increment to reach next child node explored. It also adapts the child index.
+    //this function return the next location increment to reach next child node explored. It also modifies the child index to the next child.
     int Node::getLocationIncrement(char *childIndex){
 
         //retrieve maze square on which robot taking its turn is located
