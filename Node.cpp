@@ -119,8 +119,6 @@ using namespace std;
         }
     }
 
-    
-
     /*
     Node Node::configureChild(char childIndex, int locationIncrement){
 

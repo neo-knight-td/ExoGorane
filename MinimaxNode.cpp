@@ -12,7 +12,7 @@ MinimaxNode::MinimaxNode(char *paramMaze, Robot *paramRobots, bool paramTeamTaki
 //getValueOfNextState is a recursive function that will explore the tree of states and return the maximum utility
 //value reachable from the current game state. It will also provide the move required to reach that value & the depth
 //at which that value appears in the tree
-tuple<double, int, int> MinimaxNode :: getMinimax(){
+tuple<double, int, int> MinimaxNode :: runMinimax(){
 
     //if terminal state    
     if (isTerminal())
@@ -208,7 +208,7 @@ void MinimaxNode :: selectFromChildren(std::function<bool(int,int)> comparatorGr
 
         int locationIncrement = getLocationIncrement(&childIndex);
         MinimaxNode childNode = generateMinimaxNode(locationIncrement);
-        std::tie(successorMinimax, std::ignore, successorDepthToMinimax) = childNode.getMinimax();
+        std::tie(successorMinimax, std::ignore, successorDepthToMinimax) = childNode.runMinimax();
         successorDepthToMinimax++;
 
         //NOTE : debug purpose only -> bug

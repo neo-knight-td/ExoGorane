@@ -54,7 +54,7 @@ int main()
         auto begin = std::chrono::high_resolution_clock::now();
 
         //compute Minimax
-        std::tie(valueOfMinimax, moveToMinimax, std::ignore) = testMinimaxNode.getMinimax();
+        std::tie(valueOfMinimax, moveToMinimax, std::ignore) = testMinimaxNode.runMinimax();
 
         auto end = std::chrono::high_resolution_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
