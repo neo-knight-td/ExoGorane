@@ -13,7 +13,6 @@ class MinimaxNode: public Node {
         MinimaxNode(char *paramMaze, Robot *paramRobots, bool paramTeamTakingItsTurn, int paramTimeUntilGasClosing, int paramDepth, int paramMaxDepth);
         tuple<double, int, int> runMinimax();
         void selectFromChildren(std::function<bool(int,int)> comp1, std::function<bool(int,int)> comp2, double *minimax, int *moveToMinimax, int *depthToMinimax);
-        void generateChildren();
         MinimaxNode generateMinimaxNode(int locationIncrement);
 };
 

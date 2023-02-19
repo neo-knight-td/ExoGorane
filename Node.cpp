@@ -117,61 +117,23 @@ using namespace std;
             *childIndex = 4;
             return constants::MAZE_WIDTH;
         }
+        else if(*childIndex <= 4){
+            *childIndex = 1;
+            return -1;
+        }
     }
 
-    /*
-    Node Node::configureChild(char childIndex, int locationIncrement){
+    
+    void Node::configureChild(int locationIncrement){
 
-        //copy robots
-        //TODO : optimize using this https://stackoverflow.com/a/16137997/15539525
-        Robot successorRobots[constants::NB_OF_ROBOTS];
-        for (int i=0; i< constants::NB_OF_ROBOTS; i++)
-            successorRobots[i] = this->robots[i];
+        configureRobotsLocationInChildNode(this->robots, locationIncrement);
+        configureCoinsInChildNode(this->maze, this->robots);
+        configureGasInChildNode(this->maze, &(this->timeUntilGasClosing));
+        configureRobotsLivesInChildNode(this->maze, this->robots);
+        configureTeamInChildNode(this->robots, &(this->teamTakingItsTurn));
 
-        //adapt the robot's location in successor state
-        successorRobots[this->teamTakingItsTurn].location += locationIncrement;
-        
-        //copy maze content
-        //TODO : optimize using this https://stackoverflow.com/a/16137997/15539525
-        char successorMaze[constants::NB_OF_MAZE_SQUARES];
-        for (int j=0; j< constants::NB_OF_MAZE_SQUARES; j++)
-            successorMaze[j] = this->maze[j];
-
-        //adapt the coins on ground in successor state only if we find a coin on the robot's next location
-        if (successorRobots[this->teamTakingItsTurn].location & constants::COIN_MASK){
-            successorRobots[this->teamTakingItsTurn].coinNb += 1;
-            successorMaze[successorRobots[this->teamTakingItsTurn].location] += -constants::COIN_MASK;
-        }
-        
-        //adapt time until gas closes in successor state (unless reaches 0, then close the gas)
-        //TODO : time should be decreased only once on two when both robots are alive
-        int successorTimeUntilGasClosing = this->timeUntilGasClosing -1;
-
-        //TODO : if necessarry, close the gas
-        if (successorTimeUntilGasClosing == 0){
-            //close the gas !
-            //flip the gas bit inside all squares that are in the gas                   
-        }
-        
-        //adapt robots life if next location is in the gaz
-        //NOTE : next 4 lines cost about 100 nanoseconds (on Thomas Desktop)
-        //TODO : optimize these 4 lines
-        for (int k=0; k< constants::NB_OF_ROBOTS; k++){
-            if(successorMaze[successorRobots[k].location] & constants::GAS_MASK)
-                successorRobots[k].isAlive = false;
-        }
-        
-        //adapt team in successor state only if other team robots are alive
-        bool successorTeamTakingItsTurn = this->teamTakingItsTurn;
-        if (successorRobots[!(this->teamTakingItsTurn)].isAlive){
-            bool successorTeamTakingItsTurn = !(this->teamTakingItsTurn);
-        }
-        
-        //TODO : check that child node is not freed at excit of this function
-        //TODO : think how to free the memory for the child nodes
-        return Node(successorMaze, successorRobots, successorTeamTakingItsTurn, successorTimeUntilGasClosing);
     }
-    */
+    
 
     /*
     int Node::getLocationIncrement(char childIndex){

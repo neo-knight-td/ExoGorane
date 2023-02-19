@@ -235,29 +235,10 @@ void MinimaxNode :: selectFromChildren(std::function<bool(int,int)> comparatorGr
 
 MinimaxNode MinimaxNode::generateMinimaxNode(int locationIncrement){
 
-    //copy robots
-    //TODO : optimize using this https://stackoverflow.com/a/16137997/15539525
-    Robot childRobots[constants::NB_OF_ROBOTS];
-    for (int i=0; i< constants::NB_OF_ROBOTS; i++)
-        childRobots[i] = this->robots[i];
+    //copy node (and adapt depth in it)
+    MinimaxNode childNode(this->maze, this->robots, this->teamTakingItsTurn, this->timeUntilGasClosing, this->depth+1, this->maxDepth);
+    //connfigure child node
+    childNode.configureChild(locationIncrement);
 
-    //copy maze content
-    //TODO : optimize using this https://stackoverflow.com/a/16137997/15539525
-    char childMaze[constants::NB_OF_MAZE_SQUARES];
-    for (int j=0; j< constants::NB_OF_MAZE_SQUARES; j++)
-        childMaze[j] = this->maze[j];
-    
-    //configure child node
-    configureRobotsLocationInChildNode(childRobots, locationIncrement);
-    configureCoinsInChildNode(childMaze, childRobots);
-    int childTimeUntilGasClosing;
-    configureGasInChildNode(childMaze, &childTimeUntilGasClosing);
-    configureRobotsLivesInChildNode(childMaze, childRobots);
-    bool childTeamTakingItsTurn;
-    configureTeamInChildNode(childRobots, &childTeamTakingItsTurn);
-    int childDepth = this->depth+1;
-
-    //generate & return configured child node
-    return MinimaxNode(childMaze,childRobots,childTeamTakingItsTurn,childTimeUntilGasClosing,childDepth,this->maxDepth);
-    
+    return childNode;
 }

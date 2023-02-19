@@ -35,7 +35,7 @@ class Node
         void configureGasInChildNode(char childMaze[], int *childTimeUntilGasClosing);
         void configureRobotsLivesInChildNode(char childMaze[], Robot childRobots[]);
         void configureTeamInChildNode(Robot childRobots[], bool *childTeamTakingItsTurn);
-        //Node configureChild(char childIndex, int locationIncrement);
+        void configureChild(int locationIncrement);
         char getDescendanceSize();
         char getNextChildIndex(char previousChildIndex);
         //void generateChildren();
