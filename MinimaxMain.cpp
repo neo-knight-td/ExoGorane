@@ -27,7 +27,7 @@ int main()
     simpleRobots[constants::GORANE_TEAM] = simpleRobotG;
     simpleRobots[constants::ENEMY_TEAM] = simpleRobotE;
     int timeUntilGasClosing = constants::GAS_CLOSING_INTERVAL;
-    int maxDepth = 10;
+    int maxDepth = 3;
 
     //  Example 2 : long maze (5x2) with 2 robots and 1 coin
 
@@ -177,10 +177,10 @@ int main()
         std::tie(valueOfMinimax, moveToMinimax, std::ignore) = minimaxNode.runMinimax();
         
         auto end = std::chrono::high_resolution_clock::now();
-        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
+        auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - begin);
 
         std::cout << "Robot " << teamNames[minimaxNode.teamTakingItsTurn] << " should move to "<< moveToMinimax << "." << std::endl;
-        std::cout << "Computing time was " << elapsed.count() << " milliseconds" << endl;
+        std::cout << "Computing time was " << elapsed.count() << " microseconds" << endl;
 
         //update node
         minimaxNode.configureChild(moveToMinimax);

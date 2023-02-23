@@ -27,7 +27,7 @@ int main()
     simpleRobots[constants::GORANE_TEAM] = simpleRobotG;
     simpleRobots[constants::ENEMY_TEAM] = simpleRobotE;
     int timeUntilGasClosing = constants::GAS_CLOSING_INTERVAL;
-    int maxDepth = 10;
+    int iteration = 10;
     
     double valueOfMCTS;
     int locationIncrement;
@@ -41,40 +41,35 @@ int main()
     vector<string> teamNames = {"Enemy", "Goranes"};
 
     //init game state
-    MCTSNode mctsNode = MCTSNode(simpleMaze,simpleRobots,bTeamId,timeUntilGasClosing);
-    
-    bool result = mctsNode.simulate();
-    mctsNode.generateDescendance();
-    mctsNode.selectFromChildren();
+    MCTSNode mctsNode = MCTSNode(simpleMaze,simpleRobots,bTeamId,timeUntilGasClosing, nullptr);
 
-    /*
+    mctsNode.printNode();
 
     while (!mctsNode.isTerminal())
     {
-        std:cout << "Turn to " << teamNames[minimaxNode.teamTakingItsTurn] << " team." << endl;
+        std:cout << "Turn to " << teamNames[mctsNode.teamTakingItsTurn] << " team." << endl;
         auto begin = std::chrono::high_resolution_clock::now();
 
         //compute minimax value & move to minimax
-        std::tie(valueOfMCTS, moveToMinimax, std::ignore) = minimaxNode.runMinimax();
+        std::tie(valueOfMCTS, locationIncrement) = mctsNode.runMCTS(iteration);
         
         auto end = std::chrono::high_resolution_clock::now();
-        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
+        auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - begin);
 
-        std::cout << "Robot " << teamNames[minimaxNode.teamTakingItsTurn] << " should move to "<< moveToMinimax << "." << std::endl;
-        std::cout << "Computing time was " << elapsed.count() << " milliseconds" << endl;
+        std::cout << "Robot " << teamNames[mctsNode.teamTakingItsTurn] << " should move to "<< locationIncrement << "." << std::endl;
+        std::cout << "Computing time was " << elapsed.count() << " microseconds" << endl;
 
         //update node
-        minimaxNode.configureRobotsLocationInChildNode(minimaxNode.robots, moveToMinimax);
-        minimaxNode.configureCoinsInChildNode(minimaxNode.maze, minimaxNode.robots);
-        minimaxNode.configureGasInChildNode(minimaxNode.maze, &timeUntilGasClosing);
-        minimaxNode.configureRobotsLivesInChildNode(minimaxNode.maze, minimaxNode.robots);
-        minimaxNode.configureTeamInChildNode(minimaxNode.robots, &minimaxNode.teamTakingItsTurn);
+        mctsNode.configureRobotsLocationInChildNode(mctsNode.robots, locationIncrement);
+        mctsNode.configureCoinsInChildNode(mctsNode.maze, mctsNode.robots);
+        mctsNode.configureGasInChildNode(mctsNode.maze, &timeUntilGasClosing);
+        mctsNode.configureRobotsLivesInChildNode(mctsNode.maze, mctsNode.robots);
+        mctsNode.configureTeamInChildNode(mctsNode.robots, &mctsNode.teamTakingItsTurn);
 
         //print new node
-        minimaxNode.printNode();
+        mctsNode.printNode();
     }
-    */
 
     std::cout << "Game Over" << endl;
-    std::cout << "Result is " << result << std::endl;
+
 }

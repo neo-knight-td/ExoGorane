@@ -199,7 +199,7 @@ tuple<double, int, int> MinimaxNode :: runMinimax(){
 void MinimaxNode :: selectFromChildren(std::function<bool(int,int)> comparatorGreaterLesser, std::function<bool(int,int)> comparatorLesserGreater, double *minimax,
     int *moveToMinimax, int *depthToMinimax){
     
-    char childIndex = 0;
+    char childIndex = -1;
     char numberOfChildren = getDescendanceSize();
     for (char i = 0; i < numberOfChildren; i++){
             

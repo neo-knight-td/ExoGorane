@@ -5,27 +5,34 @@
 
 class MCTSNode: public Node {
     public :
-        int value;
-        int visits;
+        int value = 0;
+        int visits = 0;
+        MCTSNode *pParentNode = nullptr;
         MCTSNode *pChildNodes[constants::BRANCHING_FACTOR];
 
     public :
         //constructor for MCTSNode
-        MCTSNode(char *paramMaze, Robot *paramRobots, bool paramTeamTakingItsTurn, int paramTimeUntilGasClosing);
+        MCTSNode(char *paramMaze, Robot *paramRobots, bool paramTeamTakingItsTurn, int paramTimeUntilGasClosing, MCTSNode* pParamParentNode);
         //TODO : create a destructor !
         ~MCTSNode();
         //returns the best child node from current node based on MCTS algorithm
         tuple<double, int> runMCTS(int iterations);
         //searches the tree using MCTS algorithm
         void search();
-        //selects one child node from current node based on UCB
-        void selectFromChildren();
-        //expands node from the current node
-        void generateDescendance();
+        //selects one leaf node from current node based on UCB and return pointer to it (with UCB value)
+        tuple<MCTSNode*, double> selectFromLeaves();
+        //expands node from the current node, simulate a child and return values obtained
+        void generateChild(char *pChildIndex);
         //simulate a game until bottom of the tree and record outcome
         bool simulate();
-        //generate an MCTS node
-        MCTSNode generateMCTSNode(int locationIncrement);
+        //update values & visits in node
+        void update(int paramValue);
+        //backpropagate update towards parent
+        void backpropagate(int paramValue);
+        //checks if node is a leaf node
+        bool isLeafNode();
+        //get UCB
+        double getUCB();
 };
 
 #endif

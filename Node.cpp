@@ -91,35 +91,42 @@ using namespace std;
         return descendanceSize;
     }
     
-    //this function return the next location increment to reach next child node explored. It also modifies the child index to the next child.
-    int Node::getLocationIncrement(char *childIndex){
+    //this function return the location increment required to reach child node at index childIndex. If however child index refers to a non-legal move, the function
+    //returns the location increment to reach child node accessible from next legal move. If updateChildIndex is left to default value (true), the function also modifies the child index to the current child index.
+    //TODO change name of this function to getLocationIncrementAndUpdateChildIndex()
+    int Node::getLocationIncrement(char *pChildIndex){
 
         //retrieve maze square on which robot taking its turn is located
         char mazeSquare = this->maze[this->robots[this->teamTakingItsTurn].location];
 
         //TODO : add default child (child index 0)
-        if(*childIndex <= 0 && (mazeSquare & constants::UP_MASK)){
-            *childIndex = 1;
+        if(*pChildIndex <= 0 && (mazeSquare & constants::UP_MASK)){
+            *pChildIndex = 1;
             return -1;
         }
             
-        if(*childIndex <= 1 && (mazeSquare & constants::DOWN_MASK)){
-            *childIndex = 2;
+        if(*pChildIndex <= 1 && (mazeSquare & constants::DOWN_MASK)){
+            *pChildIndex = 2;
             return 1;
         }
             
-        if(*childIndex <= 2 && (mazeSquare & constants::LEFT_MASK)){
-            *childIndex = 3;
+        if(*pChildIndex <= 2 && (mazeSquare & constants::LEFT_MASK)){
+            *pChildIndex = 3;
             return -constants::MAZE_WIDTH;
         }
             
-        if(*childIndex <= 3 && (mazeSquare & constants::RIGHT_MASK)){
-            *childIndex = 4;
+        if(*pChildIndex <= 3 && (mazeSquare & constants::RIGHT_MASK)){
+            *pChildIndex = 4;
             return constants::MAZE_WIDTH;
         }
-        else if(*childIndex <= 4){
-            *childIndex = 1;
-            return -1;
+        //if previous index was equal to 4, reset value of child Index and rerun function
+        if(*pChildIndex <= 4){
+            *pChildIndex = 0;
+            return getLocationIncrement(pChildIndex);
+        }
+        else{
+            std::cout << "ERROR : trying to access child that does not exist." << std::endl;
+            return -1000;
         }
     }
 
