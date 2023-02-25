@@ -8,19 +8,19 @@ class MCTSNode: public Node {
         int value = 0;
         int visits = 0;
         MCTSNode *pParentNode = nullptr;
-        MCTSNode *pChildNodes[constants::BRANCHING_FACTOR];
+        MCTSNode *pChildNodes[game::BRANCHING_FACTOR];
 
     public :
         //constructor for MCTSNode
-        MCTSNode(char *paramMaze, Robot *paramRobots, bool paramTeamTakingItsTurn, int paramTimeUntilGasClosing, MCTSNode* pParamParentNode);
+        MCTSNode(char *paramMaze, Team *paramTeams, bool paramTeamTakingItsTurn, int paramTimeUntilGasClosing, MCTSNode* pParamParentNode);
         //TODO : create a destructor !
         ~MCTSNode();
         //returns the best child node from current node based on MCTS algorithm
-        tuple<double, int> runMCTS(int iterations);
+        tuple<double, int> runMCTS(int iterations, bool topOfTreeTeam);
         //searches the tree using MCTS algorithm
         void search();
         //selects one leaf node from current node based on UCB and return pointer to it (with UCB value)
-        tuple<MCTSNode*, double> selectFromLeaves();
+        tuple<MCTSNode*, double> selectFromLeaves(bool topOfTreeTeam);
         //expands node from the current node, simulate a child and return values obtained
         void generateChild(char *pChildIndex);
         //simulate a game until bottom of the tree and record outcome
@@ -32,7 +32,7 @@ class MCTSNode: public Node {
         //checks if node is a leaf node
         bool isLeafNode();
         //get UCB
-        double getUCB();
+        double getUCB(bool topOfTreeTeam);
 };
 
 #endif

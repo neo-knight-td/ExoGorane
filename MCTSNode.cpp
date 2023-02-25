@@ -6,7 +6,7 @@
 #include "Node.cpp"
 
 //constructor for MCTSNode
-MCTSNode::MCTSNode(char *paramMaze, Robot *paramRobots, bool paramTeamTakingItsTurn, int paramTimeUntilGasClosing, MCTSNode* pParamParentNode) : Node(paramMaze, paramRobots, paramTeamTakingItsTurn, paramTimeUntilGasClosing){
+MCTSNode::MCTSNode(char *paramMaze,  Team *paramTeams, bool paramTeamTakingItsTurn, int paramTimeUntilGasClosing, MCTSNode* pParamParentNode) : Node(paramMaze, paramTeams, paramTeamTakingItsTurn, paramTimeUntilGasClosing){
     //init all pointers to null
     for (int i=0; i < sizeof(pChildNodes)/sizeof(*pChildNodes); i++)
         this->pChildNodes[i] = nullptr;
@@ -26,7 +26,7 @@ MCTSNode::~MCTSNode(){
 }
 
 //returns the best child node from current node based on MCTS algorithm
-tuple<double, int> MCTSNode::runMCTS(int iterations){
+tuple<double, int> MCTSNode::runMCTS(int iterations, bool topOfTreeTeam){
 
     char childIndex = -1;
 
@@ -39,17 +39,17 @@ tuple<double, int> MCTSNode::runMCTS(int iterations){
         if (i == 0)
             pSelectedLeafNode = this;
         else
-            std:tie(pSelectedLeafNode, std::ignore) = selectFromLeaves();
+            std:tie(pSelectedLeafNode, std::ignore) = selectFromLeaves(topOfTreeTeam);
         
         
         childIndex = -1;
-        for (int i = 0; i < pSelectedLeafNode->getDescendanceSize(); i++){
+        for (int j = 0; j < pSelectedLeafNode->getDescendanceSize(); j++){
             //expand (generate child)
             pSelectedLeafNode->generateChild(&childIndex);
             //simulate (access child you just generated, simulate and return outcome)
-            value = pSelectedLeafNode->pChildNodes[childIndex]->simulate();
+            int result = pSelectedLeafNode->pChildNodes[childIndex]->simulate();
             //backpropagate towards parents
-            pSelectedLeafNode->pChildNodes[childIndex]->backpropagate(value);
+            pSelectedLeafNode->pChildNodes[childIndex]->backpropagate(result);
         }
     }
 
@@ -63,7 +63,7 @@ tuple<double, int> MCTSNode::runMCTS(int iterations){
         //update child index & record location increment
         int locationIncrement = getLocationIncrement(&childIndex);
         //record UCB in child node
-        double UCB = this->pChildNodes[childIndex]->getUCB();
+        double UCB = this->pChildNodes[childIndex]->getUCB(topOfTreeTeam);
         //if UCB is bigger, save it
         if (UCB > maxUCB){
             maxUCB = UCB;
@@ -81,11 +81,11 @@ void MCTSNode::search(){
 
 
 //selects one leaf node from current node based on UCB and return pointer to it (with UCB value)
-tuple<MCTSNode*, double> MCTSNode::selectFromLeaves(){
+tuple<MCTSNode*, double> MCTSNode::selectFromLeaves(bool topOfTreeTeam){
 
-    //if node is leaf (means never expanded thus never visited thus visits = 0)
-    if(this->visits == 1){
-        return {this,this->getUCB()};
+    //if node is leaf
+    if(isLeafNode()){
+        return {this,this->getUCB(topOfTreeTeam)};
     }
     else{//if it's not a leaf node, look in child nodes
         char childIndex = -1;
@@ -101,7 +101,7 @@ tuple<MCTSNode*, double> MCTSNode::selectFromLeaves(){
             //recover child node address
             MCTSNode *pChildNode = this->pChildNodes[childIndex];
             //perform selection from child node then return best leaf and associated UCB
-            std::tie(pLeafNode, UCB) = pChildNode->selectFromLeaves();
+            std::tie(pLeafNode, UCB) = pChildNode->selectFromLeaves(topOfTreeTeam);
             //if better UCB is found update the values to maximize
             if (UCB > maxUCB){
                 pSelectedLeafNode = pLeafNode;
@@ -117,7 +117,7 @@ void MCTSNode::generateChild(char *pChildIndex){
     //retrieve location increment but do not update child index
     int locationIncrement = getLocationIncrement(pChildIndex);
     //create a new node
-    this->pChildNodes[*pChildIndex] = new MCTSNode(this->maze, this->robots, this->teamTakingItsTurn, this->timeUntilGasClosing, this);
+    this->pChildNodes[*pChildIndex] = new MCTSNode(this->maze, this->teams, this->teamTakingItsTurn, this->timeUntilGasClosing, this);
     //configure it
     this->pChildNodes[*pChildIndex]->configureChild(locationIncrement);
     this->pChildNodes[*pChildIndex]->pParentNode = this;
@@ -126,12 +126,12 @@ void MCTSNode::generateChild(char *pChildIndex){
 //simulate a game until bottom of the tree and return outcome
 bool MCTSNode::simulate(){
     //copy current node into simulation node
-    MCTSNode simulationNode(this->maze, this->robots, this->teamTakingItsTurn, this->timeUntilGasClosing, nullptr);
+    MCTSNode simulationNode(this->maze, this->teams, this->teamTakingItsTurn, this->timeUntilGasClosing, nullptr);
     while (!simulationNode.isTerminal()){
 
         //select random child index
         //TODO : insert constants values as paramters
-        char randomChildIndex = std::experimental::randint(1, constants::BRANCHING_FACTOR - 1);
+        char randomChildIndex = std::experimental::randint(1, game::BRANCHING_FACTOR - 1);
         int locationIncrement = simulationNode.getLocationIncrement(&randomChildIndex);
         
         //configure simulation node
@@ -146,7 +146,7 @@ bool MCTSNode::simulate(){
 
 //update values & visits in node
 void MCTSNode::update(int paramValue){
-    this->value = paramValue;
+    this->value += paramValue;
     this->visits++;
 }
 
@@ -159,9 +159,18 @@ void MCTSNode::backpropagate(int paramValue){
 
 //
 bool MCTSNode::isLeafNode(){
-    
+
+    for (int i=0; i < game::BRANCHING_FACTOR; i++){
+        if (this->pChildNodes[i] != nullptr)
+            return false;
+    }
+
+    return true;
 }
 
-double MCTSNode::getUCB(){
-    return (double) this->value / this->visits + sqrt(2 * log(this->pParentNode->visits) / this->visits);
+double MCTSNode::getUCB(bool topOfTreeTeam){
+    if (topOfTreeTeam == constants::GORANE_TEAM)
+        return (double) this->value / this->visits + sqrt(2 * log(this->pParentNode->visits) / this->visits);
+    else
+        return (double) (this->visits - this->value) / this->visits + sqrt(2 * log(this->pParentNode->visits) / this->visits);
 }

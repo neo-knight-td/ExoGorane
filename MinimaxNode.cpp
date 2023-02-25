@@ -1,41 +1,36 @@
 #include <iostream>
 #include <algorithm>
+#include <cmath>
 #include "MinimaxNode.h"
 #include "Node.h"
 #include "Node.cpp"
 
-MinimaxNode::MinimaxNode(char *paramMaze, Robot *paramRobots, bool paramTeamTakingItsTurn, int paramTimeUntilGasClosing, int paramDepth, int paramMaxDepth) : Node::Node(paramMaze, paramRobots, paramTeamTakingItsTurn, paramTimeUntilGasClosing){
+MinimaxNode::MinimaxNode(char *paramMaze, Team *paramTeams, bool paramTeamTakingItsTurn, int paramTimeUntilGasClosing, int paramDepth, int paramMaxDepth) : Node::Node(paramMaze, paramTeams, paramTeamTakingItsTurn, paramTimeUntilGasClosing){
     this->depth = paramDepth;
     this->maxDepth = paramMaxDepth;
+    this->depthLastEvalDown = paramMaxDepth;
+    this->depthLastEvalUp = paramMaxDepth;
 }
 
-//getValueOfNextState is a recursive function that will explore the tree of states and return the maximum utility
-//value reachable from the current game state. It will also provide the move required to reach that value & the depth
-//at which that value appears in the tree
-tuple<double, int, int> MinimaxNode :: runMinimax(){
+tuple<double, int, int, int> MinimaxNode :: runMinimax(){
 
     //if terminal state    
     if (isTerminal())
-        return {getNodeValue(), constants::CHAR_DUMMY_VALUE, 0};
+        return {(double) getNodeValue(), constants::CHAR_DUMMY_VALUE, this->depthLastEvalUp, this->depthLastEvalDown};
     //if max depth is reached
     else if (this->depth >= this->maxDepth)
-        return{evaluate(), constants::CHAR_DUMMY_VALUE, 0};
+        return{(double) evaluate(), constants::CHAR_DUMMY_VALUE, this->depthLastEvalUp, this->depthLastEvalDown};
 
     //otherwise
     else {
         double minimax;
         int moveToMinimax;
-        int depthToMinimax;
-
-        //generate the successor states from the current state
-        //MinimaxNode::generateChildren();
 
         //if its maximizer turn then return the value that maximizes the minimum gains of the opponent
         if (this->teamTakingItsTurn == constants::GORANE_TEAM){
             minimax = -2.0;
-            depthToMinimax= 1000;
 
-            selectFromChildren(std::greater<int>(), std::less<int>(), &minimax, &moveToMinimax, &depthToMinimax);
+            selectFromChildren(std::greater<double>(), std::less<int>(), &minimax, &moveToMinimax, &this->depthLastEvalUp, &this->depthLastEvalDown);
             /*
             for(list<GameState>::iterator it = (gameState.successors).begin(); it != (gameState.successors).end(); it++){
                 //NOTE : "it" is an iterator (pointer). Need to add * to access successor object value
@@ -114,9 +109,8 @@ tuple<double, int, int> MinimaxNode :: runMinimax(){
         //if its minimizer's turn then return the value that minimizes the maximums gains of the opponent
         else if (this->teamTakingItsTurn == constants::ENEMY_TEAM) {
             minimax = 2.0;
-            depthToMinimax = -1000;
 
-            selectFromChildren(std::less<int>(), std::greater<int>(), &minimax, &moveToMinimax, &depthToMinimax);
+            selectFromChildren(std::less<double>(), std::greater<int>(), &minimax, &moveToMinimax, &this->depthLastEvalUp, &this->depthLastEvalDown);
             /*
             for(list<GameState>::iterator it = (gameState.successors).begin(); it != (gameState.successors).end(); it++){
                 //NOTE : "it" is an iterator (pointer). Need to add * to access successor object value
@@ -190,26 +184,31 @@ tuple<double, int, int> MinimaxNode :: runMinimax(){
             */
         }
 
-        return {minimax, moveToMinimax, depthToMinimax};
+        return {minimax, moveToMinimax, this->depthLastEvalUp, this->depthLastEvalDown};
     }
 }
 
 //selectFromChildren contains the logical core of Minimax. Based on the state of the game and the team taking the turn, it will return which successor
 //is to be chosen. This function can be used for both the maximizer and the minimizer. Only the comparators will vary depending on which one is playing.
-void MinimaxNode :: selectFromChildren(std::function<bool(int,int)> comparatorGreaterLesser, std::function<bool(int,int)> comparatorLesserGreater, double *minimax,
-    int *moveToMinimax, int *depthToMinimax){
+void MinimaxNode :: selectFromChildren(std::function<bool(double,double)> comparatorGreaterLesser, std::function<bool(int,int)> comparatorLesserGreater, double *minimax,
+    int *moveToMinimax, int *pDepthLastEvalUp, int *pDepthLastEvalDown){
     
     char childIndex = -1;
+    //NOTE : TS
+    //char numberOfChildren = 1;//getDescendanceSize();
     char numberOfChildren = getDescendanceSize();
+    //MinimaxNode *pSelectedChildNode;
     for (char i = 0; i < numberOfChildren; i++){
             
         double successorMinimax;
-        int successorDepthToMinimax;
+        int successorDepthToLastEvalUp;
+        int successorDepthToLastEvalDown;
 
+        //NOTE : TS
+        //int locationIncrement = 5;//getLocationIncrement(&childIndex);
         int locationIncrement = getLocationIncrement(&childIndex);
         MinimaxNode childNode = generateMinimaxNode(locationIncrement);
-        std::tie(successorMinimax, std::ignore, successorDepthToMinimax) = childNode.runMinimax();
-        successorDepthToMinimax++;
+        std::tie(successorMinimax, std::ignore, successorDepthToLastEvalUp, successorDepthToLastEvalDown) = childNode.runMinimax();
 
         //NOTE : debug purpose only -> bug
         if (this->depth == 0){//(gameState.depthOfState == 2 && gameState.robots[1].location == 23){
@@ -220,25 +219,70 @@ void MinimaxNode :: selectFromChildren(std::function<bool(int,int)> comparatorGr
         if (comparatorGreaterLesser(successorMinimax,*minimax)){
             *minimax = successorMinimax;
             *moveToMinimax = locationIncrement;
-            *depthToMinimax = successorDepthToMinimax;
+            *pDepthLastEvalUp = successorDepthToLastEvalUp;
+            *pDepthLastEvalDown = successorDepthToLastEvalDown;
         }
+        
         //if 2 successors lead to same minimax
         else if (successorMinimax == *minimax){
-            //only update if current child node leads to minimax faster (if depth is smaller)
-            if (comparatorLesserGreater(successorDepthToMinimax, *depthToMinimax)){
-                *moveToMinimax = locationIncrement;
-                *depthToMinimax = successorDepthToMinimax;
+            if(this->teamTakingItsTurn == constants::GORANE_TEAM){
+                
+                if (successorDepthToLastEvalUp < *pDepthLastEvalUp){
+                    *moveToMinimax = locationIncrement;
+                    *pDepthLastEvalUp = successorDepthToLastEvalUp;
+                    *pDepthLastEvalDown = successorDepthToLastEvalDown;
+                }                
+            }
+
+            else if(this->teamTakingItsTurn == constants::ENEMY_TEAM){
+
+                if (successorDepthToLastEvalDown < *pDepthLastEvalDown){
+                    *moveToMinimax = locationIncrement;
+                    *pDepthLastEvalUp = successorDepthToLastEvalUp;
+                    *pDepthLastEvalDown = successorDepthToLastEvalDown;
+                }   
             }
         }
     }
+
+    /*
+
+    //TODO : implement kind of util goes up ! idea ? add feature as closest manhattan distance to next coin as eval
+    //check if we don't already have the minimax as utility (or higher)
+    if(comparatorGreaterLesser((double) evaluate(),pSelectedChildNode->evaluate())){
+        //if its the case then depth should be reset
+        //*depthToMinimax = 0;
+        *minimax = (double) (*minimax)*getDepthRegressionFactor(1);
+    }
+
+    */
+
+
 }
 
 MinimaxNode MinimaxNode::generateMinimaxNode(int locationIncrement){
 
     //copy node (and adapt depth in it)
-    MinimaxNode childNode(this->maze, this->robots, this->teamTakingItsTurn, this->timeUntilGasClosing, this->depth+1, this->maxDepth);
-    //connfigure child node
+    MinimaxNode childNode(this->maze, this->teams, this->teamTakingItsTurn, this->timeUntilGasClosing, this->depth+1, this->maxDepth);
+    //configure child node
     childNode.configureChild(locationIncrement);
 
+    if(childNode.evaluate() > evaluate()){
+        childNode.depthLastEvalUp = childNode.depth;
+        childNode.depthLastEvalDown = this->depthLastEvalDown;
+    }
+    else if(childNode.evaluate() < evaluate()){
+        childNode.depthLastEvalDown = childNode.depth;
+        childNode.depthLastEvalUp = this->depthLastEvalUp;
+    }
+    else{
+        childNode.depthLastEvalDown = this->depthLastEvalDown;
+        childNode.depthLastEvalUp = this->depthLastEvalUp;
+    }
+
     return childNode;
+}
+
+double MinimaxNode::getDepthRegressionFactor(int paramDepth){
+    return (double) pow((double) pow(2,(double) 1/(2*(this->maxDepth -1 ))), paramDepth);
 }

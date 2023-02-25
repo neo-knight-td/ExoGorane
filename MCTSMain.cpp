@@ -1,7 +1,8 @@
 //--------------------------------------------------------------------------------------------
 //NOTE : make sure to include the correct constants ! It will define all the game parameters
-#include "SimpleMazeConstants.h"
+#include "FourRobotsRegularGame.h"
 //--------------------------------------------------------------------------------------------
+#include "Constants.h"
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -17,23 +18,48 @@ int main()
 {
     std::cout << "Hello Gorane !" << std::endl;
 
-    //retrieve all game parameters from constant file
-    char simpleMaze[constants::NB_OF_MAZE_SQUARES];
-    for (int i = 0; i < constants::NB_OF_MAZE_SQUARES; i++)
-        simpleMaze[i] = constants::MAZE[i];
-    struct Robot simpleRobotG = {constants::GORANE_DEFAULT_LOCATION, 0, true};
-    struct Robot simpleRobotE = {constants::ENEMY_DEFAULT_LOCATION, 0, true};
-    Robot simpleRobots[constants::NB_OF_ROBOTS];
+    char simpleMaze[game::NB_OF_MAZE_SQUARES];
+    for (int i = 0; i < game::NB_OF_MAZE_SQUARES; i++)
+        simpleMaze[i] = game::MAZE[i];
+    int timeUntilGasClosing = game::GAS_CLOSING_INTERVAL;
+    int iteration = 1000;
+
+    /*
+    //with 1 robot per team
+    struct Robot simpleRobotG = {game::GORANE_DEFAULT_LOCATION, 0, true};
+    struct Robot simpleRobotE = {game::ENEMY_DEFAULT_LOCATION, 0, true};
+    Robot simpleRobots[game::NB_OF_ROBOTS];
     simpleRobots[constants::GORANE_TEAM] = simpleRobotG;
     simpleRobots[constants::ENEMY_TEAM] = simpleRobotE;
-    int timeUntilGasClosing = constants::GAS_CLOSING_INTERVAL;
-    int iteration = 10;
-    
+    */
+
+    //with 2 robots per team
+    struct Robot G1 = {game::GORANE1_DEFAULT_LOCATION, 0, true};
+    struct Robot G2 = {game::GORANE2_DEFAULT_LOCATION, 0, true};
+    struct Robot E1 = {game::ENEMY1_DEFAULT_LOCATION, 0, true};
+    struct Robot E2 = {game::ENEMY2_DEFAULT_LOCATION, 0, true};
+
+    Robot goraneRobots[game::NB_OF_ROBOTS_PER_TEAM];
+    Robot enemyRobots[game::NB_OF_ROBOTS_PER_TEAM];
+
+    goraneRobots[constants::GORANE1_INDEX] = G1;
+    goraneRobots[constants::GORANE2_INDEX] = G2;
+    enemyRobots[constants::ENEMY1_INDEX] = E1;
+    enemyRobots[constants::ENEMY2_INDEX] = E2;
+
+    Team goraneTeam(goraneRobots);
+    Team enemyTeam(enemyRobots);
+
+    Team teams[game::NB_OF_TEAMS];
+
+    teams[constants::GORANE_TEAM] = goraneTeam;
+    teams[constants::ENEMY_TEAM] = enemyTeam;
+
     double valueOfMCTS;
     int locationIncrement;
 
     //id of team playing first
-    bool bTeamId = constants::GORANE_TEAM;
+    bool bTeamId = constants::ENEMY_TEAM;
 
     //time at start of the game
     int startTime = 0;
@@ -41,7 +67,7 @@ int main()
     vector<string> teamNames = {"Enemy", "Goranes"};
 
     //init game state
-    MCTSNode mctsNode = MCTSNode(simpleMaze,simpleRobots,bTeamId,timeUntilGasClosing, nullptr);
+    MCTSNode mctsNode = MCTSNode(simpleMaze,teams,bTeamId,timeUntilGasClosing, nullptr);
 
     mctsNode.printNode();
 
@@ -51,7 +77,7 @@ int main()
         auto begin = std::chrono::high_resolution_clock::now();
 
         //compute minimax value & move to minimax
-        std::tie(valueOfMCTS, locationIncrement) = mctsNode.runMCTS(iteration);
+        std::tie(valueOfMCTS, locationIncrement) = mctsNode.runMCTS(iteration, mctsNode.teamTakingItsTurn);
         
         auto end = std::chrono::high_resolution_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - begin);
@@ -60,11 +86,7 @@ int main()
         std::cout << "Computing time was " << elapsed.count() << " microseconds" << endl;
 
         //update node
-        mctsNode.configureRobotsLocationInChildNode(mctsNode.robots, locationIncrement);
-        mctsNode.configureCoinsInChildNode(mctsNode.maze, mctsNode.robots);
-        mctsNode.configureGasInChildNode(mctsNode.maze, &timeUntilGasClosing);
-        mctsNode.configureRobotsLivesInChildNode(mctsNode.maze, mctsNode.robots);
-        mctsNode.configureTeamInChildNode(mctsNode.robots, &mctsNode.teamTakingItsTurn);
+        mctsNode.configureChild(locationIncrement);
 
         //print new node
         mctsNode.printNode();
