@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------------
 //NOTE : make sure to include the correct constants ! It will define all the game parameters
-#include "FourRobotsRegularGame.h"
+#include "FourRobotsLargeMaze.h"
 //--------------------------------------------------------------------------------------------
 #include "Constants.h"
 #include <iostream>
