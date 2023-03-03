@@ -57,6 +57,8 @@ void Node::configureCoinsInChildNode()
 void Node::configureTimeInChildNode()
 {
 
+    //NOTE : hard coded for 2 robots
+
     // if both teams are alive
     if (this->teams[constants::ENEMY_TEAM].isAlive && this->teams[constants::GORANE_TEAM].isAlive){
         
@@ -167,15 +169,15 @@ void Node::configureGasInChildNode()
 
 void Node::configureRobotsLivesInChildNode()
 {
-    // adapt robots life if next location is in the gaz
-    // NOTE : next 4 lines cost about 100 nanoseconds (on Thomas Desktop)
-    // TODO : optimize these 4 lines
-    /*
-    for (int k=0; k< game::NB_OF_ROBOTS; k++){
-        if(this->maze[this->robots[k].location] & constants::GAS_MASK)
-            this->robots[k].isAlive = false;
-    }
-    */
+        // adapt robots life if next location is in the gaz
+        // NOTE : next 4 lines cost about 100 nanoseconds (on Thomas Desktop)
+        // TODO : optimize these 4 lines
+        /*
+        for (int k=0; k< game::NB_OF_ROBOTS; k++){
+            if(this->maze[this->robots[k].location] & constants::GAS_MASK)
+                this->robots[k].isAlive = false;
+        }
+        */
 
     for (int k = 0; k < game::NB_OF_TEAMS; k++)
     {
@@ -232,8 +234,11 @@ void Node::configureTeamInChildNode()
 }
     
 
-void Node::configureChild(int locationIncrement)
+void Node::configureChild(char childIndex)
 {
+    //TODO : add code if lottery node
+
+    int locationIncrement = getLocationIncrement(childIndex);
 
     configureRobotsLocationInChildNode(locationIncrement);
     configureCoinsInChildNode();
@@ -273,12 +278,10 @@ char Node::getDescendanceSize()
     return descendanceSize;
 }
 
-// this function return the location increment required to reach child node at index childIndex. If however child index refers to a non-legal move, the function
-// returns the location increment to reach child node accessible from next legal move. If updateChildIndex is left to default value (true), the function also modifies the child index to the current child index.
-// TODO change name of this function to getLocationIncrementAndUpdateChildIndex()
-int Node::getLocationIncrement(char *pChildIndex)
-{
-
+// this function sets value of child index to the next legal child index
+void Node::setToNextLegalChildIndex(char *pChildIndex)
+{   
+    //TODO : add code if lottery node
     // retrieve maze square on which robot taking its turn is located
     char mazeSquare = this->maze[this->teams[this->teamTakingItsTurn].robots[this->teams[this->teamTakingItsTurn].robotTakingItsTurn].location];
 
@@ -286,34 +289,54 @@ int Node::getLocationIncrement(char *pChildIndex)
     if (*pChildIndex <= 0 && (mazeSquare & constants::UP_MASK))
     {
         *pChildIndex = 1;
-        return -1;
     }
 
-    if (*pChildIndex <= 1 && (mazeSquare & constants::DOWN_MASK))
+    else if (*pChildIndex <= 1 && (mazeSquare & constants::DOWN_MASK))
     {
         *pChildIndex = 2;
-        return 1;
     }
 
-    if (*pChildIndex <= 2 && (mazeSquare & constants::LEFT_MASK))
+    else if (*pChildIndex <= 2 && (mazeSquare & constants::LEFT_MASK))
     {
         *pChildIndex = 3;
-        return -game::MAZE_WIDTH;
     }
 
-    if (*pChildIndex <= 3 && (mazeSquare & constants::RIGHT_MASK))
+    else if (*pChildIndex <= 3 && (mazeSquare & constants::RIGHT_MASK))
     {
         *pChildIndex = 4;
-        return game::MAZE_WIDTH;
     }
-    // if previous index was equal to 4, reset value of child Index and rerun function
-    if (*pChildIndex <= 4)
+    // if previous index was equal to 4, reset value of child Index and call function again
+    else if (*pChildIndex <= 4)
     {
-        *pChildIndex = 0;
-        return getLocationIncrement(pChildIndex);
+        *pChildIndex = -1;
+        setToNextLegalChildIndex(pChildIndex);
     }
     else
     {
+        std::cout << "ERROR : trying to access child that does not exist." << std::endl;
+    }
+}
+
+
+// this function return the location increment required to reach child node at index childIndex. The function supposes that child at child index is legal. This 
+// function is only called on non-lottery nodes
+int Node::getLocationIncrement(char childIndex)
+{
+    // TODO : add default child (child index 0)
+
+    if (childIndex == 1)
+        return -1;
+
+    else if (childIndex == 2)
+        return 1;
+
+    else if (childIndex == 3)
+        return -game::MAZE_WIDTH;
+
+    else if (childIndex == 4)
+        return game::MAZE_WIDTH;
+
+    else{
         std::cout << "ERROR : trying to access child that does not exist." << std::endl;
         return -1000;
     }
@@ -321,6 +344,8 @@ int Node::getLocationIncrement(char *pChildIndex)
 
 bool Node::isTerminal()
 {
+    //TODO if more than 50 % of coins on the ground belong to a team, state is terminal
+    
     // if no more coins on the ground
     if (this->coinsOnGround == 0)
         return true;
