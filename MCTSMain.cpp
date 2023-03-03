@@ -19,8 +19,13 @@ int main()
     std::cout << "Hello Gorane !" << std::endl;
 
     char simpleMaze[game::NB_OF_MAZE_SQUARES];
-    for (int i = 0; i < game::NB_OF_MAZE_SQUARES; i++)
+    for (int i = 0; i < game::NB_OF_MAZE_SQUARES; i++){
         simpleMaze[i] = game::MAZE[i];
+
+        //add a coin on all squares except those on which a robot lies
+        if (i != game::ENEMY1_DEFAULT_LOCATION && i != game::ENEMY2_DEFAULT_LOCATION && i != game::GORANE1_DEFAULT_LOCATION && i != game::GORANE2_DEFAULT_LOCATION)
+             simpleMaze[i] += constants::COIN_MASK;
+    }
     int timeUntilGasClosing = game::GAS_CLOSING_INTERVAL;
     int iteration = 1000;
 

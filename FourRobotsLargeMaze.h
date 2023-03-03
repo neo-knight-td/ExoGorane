@@ -10,7 +10,7 @@ namespace game
     // define the number of maze squares
     inline const int NB_OF_MAZE_SQUARES = 196;
     // define total number of coins
-    inline const int NB_OF_COINS = 4;
+    inline const int NB_OF_COINS = 192;
     inline const int MAZE_WIDTH = 14;
     //NOTE : Maze copied from https://youtu.be/QLjniy3HG8o?t=75 (coins to be added)
     inline const char MAZE[NB_OF_MAZE_SQUARES] =
@@ -112,8 +112,8 @@ namespace game
             {constants::DOWN_MASK + constants::RIGHT_MASK},//4
             {constants::UP_MASK + constants::DOWN_MASK},//5
             {constants::UP_MASK + constants::DOWN_MASK + constants::LEFT_MASK},//6
-            {constants::UP_MASK + constants::DOWN_MASK + constants::RIGHT_MASK + constants::COIN_MASK},//7
-            {constants::UP_MASK + constants::LEFT_MASK + constants::RIGHT_MASK + constants::COIN_MASK},//8
+            {constants::UP_MASK + constants::DOWN_MASK + constants::RIGHT_MASK},//7
+            {constants::UP_MASK + constants::LEFT_MASK + constants::RIGHT_MASK},//8
             {constants::DOWN_MASK + constants::LEFT_MASK},//9
             {constants::UP_MASK + constants::DOWN_MASK},//10
             {constants::UP_MASK + constants::RIGHT_MASK},//11
@@ -127,8 +127,8 @@ namespace game
             {constants::DOWN_MASK + constants::LEFT_MASK},//4
             {constants::UP_MASK + constants::DOWN_MASK},//5
             {constants::UP_MASK + constants::RIGHT_MASK},//6
-            {constants::RIGHT_MASK + constants::DOWN_MASK + constants::LEFT_MASK + constants::COIN_MASK},//7
-            {constants::UP_MASK + constants::DOWN_MASK + constants::LEFT_MASK + constants::COIN_MASK},//8
+            {constants::RIGHT_MASK + constants::DOWN_MASK + constants::LEFT_MASK},//7
+            {constants::UP_MASK + constants::DOWN_MASK + constants::LEFT_MASK},//8
             {constants::UP_MASK + constants::DOWN_MASK + constants::RIGHT_MASK},//9
             {constants::UP_MASK + constants::DOWN_MASK},//10
             {constants::UP_MASK + constants::LEFT_MASK},//11
