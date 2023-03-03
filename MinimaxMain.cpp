@@ -59,7 +59,7 @@ int main()
     //teams[constants::GORANE_TEAM] = goraneTeam;
     
     int valueOfMinimax;
-    int moveToMinimax;
+    char indexToMinimax;
 
     //id of team playing first
     bool bTeamId = constants::ENEMY_TEAM;
@@ -82,16 +82,16 @@ int main()
         auto begin = std::chrono::high_resolution_clock::now();
 
         //compute minimax value & move to minimax
-        std::tie(valueOfMinimax, moveToMinimax, std::ignore, std::ignore) = minimaxNode.runMinimax();
+        std::tie(valueOfMinimax, indexToMinimax, std::ignore, std::ignore) = minimaxNode.runMinimax();
         
         auto end = std::chrono::high_resolution_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - begin);
 
-        std::cout << "Robot " << teamNames[minimaxNode.teamTakingItsTurn] << " should move to "<< moveToMinimax << "." << std::endl;
+        std::cout << "Robot " << teamNames[minimaxNode.teamTakingItsTurn] << " should move to "<< minimaxNode.getLocationIncrement(indexToMinimax) << "." << std::endl;
         std::cout << "Computing time was " << elapsed.count() << " microseconds" << endl;
 
         //update node
-        minimaxNode.configureChild(moveToMinimax);
+        minimaxNode.configureChild(indexToMinimax);
 
         //print new node
         minimaxNode.printNode();

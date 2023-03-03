@@ -79,7 +79,6 @@ class Node
         void configureRobotsLivesInChildNode();
         void configureTeamInChildNode();
 
-        //char getNextChildIndex(char previousChildIndex);
         void countCoinsOnGround();
         bool isTerminal();
         double evaluate();
