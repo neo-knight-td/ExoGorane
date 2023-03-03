@@ -54,36 +54,32 @@ class Team{
 
 class Node
 {   public :
-        //define pointer to parent node (easy, only one parent)
-        //Node *pParentNode = nullptr;
-        //define members purely related to the node (game state)
+
         char maze[game::NB_OF_MAZE_SQUARES];
         Team teams[game::NB_OF_TEAMS];
-        //Robot robots[game::NB_OF_ROBOTS];
         bool teamTakingItsTurn;
         int timeUntilGasClosing;
         int gasClosures = 0;
         int coinsOnGround = -1;
-        //define pointers to child nodes
-        //NOTE : in order to avoid using vectors (ressource consumming), we use an array of pointers instead and set its size to the maximum number of childs possible a.k.a.
-        //branching factor (defined in the constants header).
-        //Node *pChildNodes[constants::BRANCHING_FACTOR];
 
     public :
         //default constructor, when no info about parent nor children
         Node(char *paramMaze, Team *paramTeams, bool paramTeamTakingItsTurn, int paramTimeUntilGasClosing);
-        //Node();
-        int getLocationIncrement(char *childIndex);
+
+        char getDescendanceSize();
+        void setToNextLegalChildIndex(char *pChildIndex);
+        int getLocationIncrement(char childIndex);
+
+        void configureChild(char childIndex);
+
         void configureRobotsLocationInChildNode(int locationIncrement);
         void configureCoinsInChildNode();
         void configureTimeInChildNode();
         void configureGasInChildNode();
         void configureRobotsLivesInChildNode();
         void configureTeamInChildNode();
-        void configureChild(int locationIncrement);
-        char getDescendanceSize();
-        char getNextChildIndex(char previousChildIndex);
-        //void generateChildren();
+
+        //char getNextChildIndex(char previousChildIndex);
         void countCoinsOnGround();
         bool isTerminal();
         double evaluate();

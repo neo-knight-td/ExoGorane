@@ -20,13 +20,13 @@ MCTSNode::~MCTSNode(){
     char childIndex = -1;
     for (int i = 0; i < this->getDescendanceSize(); i++){
         //update childIndex to next valid child Index
-        getLocationIncrement(&childIndex);
+        setToNextLegalChildIndex(&childIndex);
         delete this->pChildNodes[childIndex];
     }
 }
 
 //returns the best child node from current node based on MCTS algorithm
-tuple<double, int> MCTSNode::runMCTS(int iterations, bool topOfTreeTeam){
+tuple<double, char> MCTSNode::runMCTS(int iterations, bool topOfTreeTeam){
 
     char childIndex = -1;
 
@@ -44,8 +44,10 @@ tuple<double, int> MCTSNode::runMCTS(int iterations, bool topOfTreeTeam){
         
         childIndex = -1;
         for (int j = 0; j < pSelectedLeafNode->getDescendanceSize(); j++){
+            pSelectedLeafNode->setToNextLegalChildIndex(&childIndex);
+
             //expand (generate child)
-            pSelectedLeafNode->generateChild(&childIndex);
+            pSelectedLeafNode->generateChild(childIndex);
             //simulate (access child you just generated, simulate and return outcome)
             int result = pSelectedLeafNode->pChildNodes[childIndex]->simulate();
             //backpropagate towards parents
@@ -55,23 +57,23 @@ tuple<double, int> MCTSNode::runMCTS(int iterations, bool topOfTreeTeam){
 
 
     //TODO : selectFromChildren --> select one child out of children (the one with max ucb)
-    int selectedLocationIncrement = -1;
+    int selectedChildIndex = -1;
     double maxUCB = -1;
 
     childIndex = -1;
     for (int i = 0; i < getDescendanceSize(); i++){
-        //update child index & record location increment
-        int locationIncrement = getLocationIncrement(&childIndex);
+        //update child index
+        setToNextLegalChildIndex(&childIndex);
         //record UCB in child node
         double UCB = this->pChildNodes[childIndex]->getUCB(topOfTreeTeam);
         //if UCB is bigger, save it
         if (UCB > maxUCB){
             maxUCB = UCB;
-            selectedLocationIncrement = locationIncrement;
+            selectedChildIndex = childIndex;
         }
     }
 
-    return {maxUCB,selectedLocationIncrement};
+    return {maxUCB,selectedChildIndex};
 }
 
 //searches the tree using MCTS algorithm
@@ -92,12 +94,12 @@ tuple<MCTSNode*, double> MCTSNode::selectFromLeaves(bool topOfTreeTeam){
         double maxUCB = -1;
         MCTSNode *pSelectedLeafNode = nullptr;
 
-        for (int i=0; i < this->getDescendanceSize(); i++){
+        for (int i=0; i < getDescendanceSize(); i++){
             double UCB;
             MCTSNode *pLeafNode;
 
             //update childIndex to next valid child Index
-            getLocationIncrement(&childIndex);
+            setToNextLegalChildIndex(&childIndex);
             //recover child node address
             MCTSNode *pChildNode = this->pChildNodes[childIndex];
             //perform selection from child node then return best leaf and associated UCB
@@ -113,14 +115,12 @@ tuple<MCTSNode*, double> MCTSNode::selectFromLeaves(bool topOfTreeTeam){
 }
 
 //expands child at specified index
-void MCTSNode::generateChild(char *pChildIndex){
-    //retrieve location increment but do not update child index
-    int locationIncrement = getLocationIncrement(pChildIndex);
+void MCTSNode::generateChild(char childIndex){
     //create a new node
-    this->pChildNodes[*pChildIndex] = new MCTSNode(this->maze, this->teams, this->teamTakingItsTurn, this->timeUntilGasClosing, this);
+    this->pChildNodes[childIndex] = new MCTSNode(this->maze, this->teams, this->teamTakingItsTurn, this->timeUntilGasClosing, this);
     //configure it
-    this->pChildNodes[*pChildIndex]->configureChild(locationIncrement);
-    this->pChildNodes[*pChildIndex]->pParentNode = this;
+    this->pChildNodes[childIndex]->configureChild(childIndex);
+    this->pChildNodes[childIndex]->pParentNode = this;
 }
 
 //simulate a game until bottom of the tree and return outcome
@@ -132,10 +132,11 @@ bool MCTSNode::simulate(){
         //select random child index
         //TODO : insert constants values as paramters
         char randomChildIndex = std::experimental::randint(1, game::BRANCHING_FACTOR - 1);
-        int locationIncrement = simulationNode.getLocationIncrement(&randomChildIndex);
+        //set random child index to next valid child index
+        simulationNode.setToNextLegalChildIndex(&randomChildIndex);
         
         //configure simulation node
-        simulationNode.configureChild(locationIncrement);
+        simulationNode.configureChild(randomChildIndex);
 
         //NOTE : debug purpose only
         //simulationNode.printNode();

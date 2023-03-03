@@ -56,7 +56,7 @@ int main()
     teams[constants::ENEMY_TEAM] = enemyTeam;
 
     double valueOfMCTS;
-    int locationIncrement;
+    char selectedChildIndex;
 
     //id of team playing first
     bool bTeamId = constants::ENEMY_TEAM;
@@ -77,16 +77,16 @@ int main()
         auto begin = std::chrono::high_resolution_clock::now();
 
         //compute minimax value & move to minimax
-        std::tie(valueOfMCTS, locationIncrement) = mctsNode.runMCTS(iteration, mctsNode.teamTakingItsTurn);
+        std::tie(valueOfMCTS, selectedChildIndex) = mctsNode.runMCTS(iteration, mctsNode.teamTakingItsTurn);
         
         auto end = std::chrono::high_resolution_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - begin);
 
-        std::cout << "Robot " << teamNames[mctsNode.teamTakingItsTurn] << " should move to "<< locationIncrement << "." << std::endl;
+        std::cout << "Robot " << teamNames[mctsNode.teamTakingItsTurn] << " should move to "<< mctsNode.getLocationIncrement(selectedChildIndex) << "." << std::endl;
         std::cout << "Computing time was " << elapsed.count() << " microseconds" << endl;
 
         //update node
-        mctsNode.configureChild(locationIncrement);
+        mctsNode.configureChild(selectedChildIndex);
 
         //print new node
         mctsNode.printNode();
