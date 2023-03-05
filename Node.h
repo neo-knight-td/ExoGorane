@@ -62,9 +62,15 @@ class Node
         int gasClosures = 0;
         int coinsOnGround = -1;
 
+        bool isCombatOngoing = false;
+        tuple <bool,bool> robotsInCombat;
+        
+
     public :
         //default constructor, when no info about parent nor children
         Node(char *paramMaze, Team *paramTeams, bool paramTeamTakingItsTurn, int paramTimeUntilGasClosing);
+        //copy constructor
+        Node(const Node &rhs);
 
         char getDescendanceSize();
         void setToNextLegalChildIndex(char *pChildIndex);

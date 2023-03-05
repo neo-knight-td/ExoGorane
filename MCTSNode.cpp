@@ -129,9 +129,14 @@ bool MCTSNode::simulate(){
     MCTSNode simulationNode(this->maze, this->teams, this->teamTakingItsTurn, this->timeUntilGasClosing, nullptr);
     while (!simulationNode.isTerminal()){
 
-        //select random child index
+        //select random child index (if fight ongoing, only 2 children are possible)
         //TODO : insert constants values as paramters
-        char randomChildIndex = std::experimental::randint(1, game::BRANCHING_FACTOR - 1);
+        char randomChildIndex;
+        if (this->isCombatOngoing)
+            randomChildIndex = std::experimental::randint(0, 1);
+        else
+            randomChildIndex = std::experimental::randint(1, game::BRANCHING_FACTOR - 1);
+
         //set random child index to next valid child index
         simulationNode.setToNextLegalChildIndex(&randomChildIndex);
         

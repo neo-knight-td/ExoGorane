@@ -5,7 +5,7 @@
 #include "Node.h"
 #include "Node.cpp"
 
-MinimaxNode::MinimaxNode(char *paramMaze, Team *paramTeams, bool paramTeamTakingItsTurn, int paramTimeUntilGasClosing, int paramDepth, int paramMaxDepth) : Node::Node(paramMaze, paramTeams, paramTeamTakingItsTurn, paramTimeUntilGasClosing){
+MinimaxNode::MinimaxNode(const Node &rhs, int paramDepth, int paramMaxDepth) : Node::Node(rhs){
     this->depth = paramDepth;
     this->maxDepth = paramMaxDepth;
     this->depthLastEvalDown = paramMaxDepth;
@@ -264,7 +264,7 @@ void MinimaxNode :: selectFromChildren(std::function<bool(double,double)> compar
 MinimaxNode MinimaxNode::generateChild(char childIndex){
 
     //copy node (and adapt depth in it)
-    MinimaxNode childNode(this->maze, this->teams, this->teamTakingItsTurn, this->timeUntilGasClosing, this->depth+1, this->maxDepth);
+    MinimaxNode childNode(*this, this->depth+1, this->maxDepth);
     //configure child node
     childNode.configureChild(childIndex);
 
