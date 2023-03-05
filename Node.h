@@ -63,7 +63,7 @@ class Node
         int coinsOnGround = -1;
 
         bool isCombatOngoing = false;
-        tuple <bool,bool> robotsInCombat;
+        bool robotsInCombat[2] = {false, false};
         
 
     public :
@@ -83,7 +83,7 @@ class Node
         void configureTimeInChildNode();
         void configureGasInChildNode();
         void configureRobotsLivesInChildNode();
-        void configureTeamInChildNode();
+        void configureRobotTakingTurnInChildNode();
 
         void countCoinsOnGround();
         bool isTerminal();

@@ -63,7 +63,7 @@ int main()
     //current depth
     int depth = 0;
     //max depth
-    int maxDepth = 11;
+    int maxDepth = 10 *4 -1;
     
     MinimaxNode minimaxNode = MinimaxNode(myNode, depth, maxDepth);
 
@@ -71,17 +71,24 @@ int main()
 
     while (!minimaxNode.isTerminal())
     {
-        std:cout << "Turn to " << teamNames[minimaxNode.teamTakingItsTurn] << " team." << endl;
-        auto begin = std::chrono::high_resolution_clock::now();
+        if (minimaxNode.isCombatOngoing){
+            //random kill one of the robots in combat
+            indexToMinimax = std::experimental::randint(0, 1);
+        }
 
-        //compute minimax value & move to minimax
-        std::tie(valueOfMinimax, indexToMinimax, std::ignore, std::ignore) = minimaxNode.runMinimax();
-        
-        auto end = std::chrono::high_resolution_clock::now();
-        auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - begin);
+        else {
+            std:cout << "Turn to " << teamNames[minimaxNode.teamTakingItsTurn] << " team." << endl;
+            auto begin = std::chrono::high_resolution_clock::now();
 
-        std::cout << "Robot " << teamNames[minimaxNode.teamTakingItsTurn] << " should move to "<< minimaxNode.getLocationIncrement(indexToMinimax) << "." << std::endl;
-        std::cout << "Computing time was " << elapsed.count() << " microseconds" << endl;
+            //compute minimax value & index to minimax
+            std::tie(valueOfMinimax, indexToMinimax, std::ignore, std::ignore) = minimaxNode.runMinimax();
+            
+            auto end = std::chrono::high_resolution_clock::now();
+            auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - begin);
+
+            std::cout << "Robot " << teamNames[minimaxNode.teamTakingItsTurn] << " should move to "<< minimaxNode.getLocationIncrement(indexToMinimax) << "." << std::endl;
+            std::cout << "Computing time was " << elapsed.count() << " microseconds" << endl;
+        }
 
         //update node
         minimaxNode.configureChild(indexToMinimax);

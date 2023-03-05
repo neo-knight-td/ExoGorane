@@ -46,7 +46,11 @@ Node::Node(const Node &rhs){
     //countCoinsOnGround();
 
     this->isCombatOngoing = rhs.isCombatOngoing;
-    this->robotsInCombat  = rhs.robotsInCombat;
+    //copy robots in combat
+    for (int k = 0; k < 2; k++)
+    {
+        this->robotsInCombat[k] = rhs.robotsInCombat[k];
+    }
 }
 
 void Node::configureRobotsLocationInChildNode(int locationIncrement)
@@ -57,12 +61,27 @@ void Node::configureRobotsLocationInChildNode(int locationIncrement)
     // record new location of robot taking the turn
     int robotLocation = this->teams[this->teamTakingItsTurn].robots[this->teams[this->teamTakingItsTurn].robotTakingItsTurn].location;
 
-    //if new robot's position coincides with position of any robot from other team, combat is ongoing
+    
     int otherTeamFirstRobotLocation = this->teams[!this->teamTakingItsTurn].robots[false].location;
-    int otherTeamSecondtRobotLocation = this->teams[!this->teamTakingItsTurn].robots[true].location;
+    int otherTeamSecondRobotLocation = this->teams[!this->teamTakingItsTurn].robots[true].location;
 
-    if(robotLocation == otherTeamFirstRobotLocation || robotLocation == otherTeamSecondtRobotLocation)
+    //if new robot's position coincides with position of first robot from other team
+    if(robotLocation == otherTeamFirstRobotLocation){
+        //combat is ongoing
         this->isCombatOngoing = true;
+        //fill in robots in combat
+        this->robotsInCombat[this->teamTakingItsTurn] = this->teams[this->teamTakingItsTurn].robotTakingItsTurn;
+        this->robotsInCombat[!this->teamTakingItsTurn] = false;
+
+    }
+    //else if new robot's position coincides with position of second robot from other team
+    else if(robotLocation == otherTeamSecondRobotLocation){
+        //combat is ongoing
+        this->isCombatOngoing = true;
+        //fill in robots in combat
+        this->robotsInCombat[this->teamTakingItsTurn] = this->teams[this->teamTakingItsTurn].robotTakingItsTurn;
+        this->robotsInCombat[!this->teamTakingItsTurn] = true;
+    }
 
     if (robotLocation < 0)
         cout << "ERROR : Initializing robot at negative location" << endl;
@@ -223,7 +242,7 @@ void Node::configureRobotsLivesInChildNode()
     }
 }
 
-void Node::configureTeamInChildNode()
+void Node::configureRobotTakingTurnInChildNode()
 {
     /*
     //adapt team in successor state only if other team is alive
@@ -269,16 +288,29 @@ void Node::configureTeamInChildNode()
 
 void Node::configureChild(char childIndex)
 {
-    //TODO : add code if lottery node
+    //if no combat is ongoing
+    if (!this->isCombatOngoing){
+        int locationIncrement = getLocationIncrement(childIndex);
 
-    int locationIncrement = getLocationIncrement(childIndex);
+        configureRobotsLocationInChildNode(locationIncrement);
+        configureCoinsInChildNode();
+        configureTimeInChildNode();
+        configureGasInChildNode();
+        configureRobotsLivesInChildNode();
+        configureRobotTakingTurnInChildNode();
+    }
+    else{
+        //kill a robot
+        this->teams[(childIndex+1)%2].robots[this->robotsInCombat[(childIndex+1)%2]].isAlive = false;
+        this->teams[(childIndex+1)%2].updateLives();
 
-    configureRobotsLocationInChildNode(locationIncrement);
-    configureCoinsInChildNode();
-    configureTimeInChildNode();
-    configureGasInChildNode();
-    configureRobotsLivesInChildNode();
-    configureTeamInChildNode();
+        //update team taking turn
+        configureRobotTakingTurnInChildNode();
+        
+        //Reset combat ongoing bool
+        this->isCombatOngoing = false;
+    }
+
 }
 
 // returns the number of children from the current node (number of legal moves from the current node)

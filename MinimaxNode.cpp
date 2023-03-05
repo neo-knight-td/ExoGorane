@@ -26,8 +26,29 @@ tuple<double, char, int, int> MinimaxNode :: runMinimax(){
         double minimax;
         char indexToMinimax;
 
+        //if it's expectimizer's turn
+        if (this->isCombatOngoing){
+            
+            minimax = 0;
+            char childIndex = -1;
+            char numberOfChildren = getDescendanceSize();
+            for (char i = 0; i < numberOfChildren; i++){
+                    
+                double successorMinimax;
+
+                setToNextLegalChildIndex(&childIndex);
+                MinimaxNode childNode = generateChild(childIndex);
+
+                std::tie(successorMinimax, std::ignore, std::ignore, std::ignore) = childNode.runMinimax();
+
+                minimax += (double) successorMinimax/numberOfChildren;
+
+            }
+            
+        }
+
         //if its maximizer turn then return the value that maximizes the minimum gains of the opponent
-        if (this->teamTakingItsTurn == constants::GORANE_TEAM){
+        else if (this->teamTakingItsTurn == constants::GORANE_TEAM){
             minimax = -2.0;
 
             selectFromChildren(std::greater<double>(), std::less<int>(), &minimax, &indexToMinimax, &this->depthLastEvalUp, &this->depthLastEvalDown);
