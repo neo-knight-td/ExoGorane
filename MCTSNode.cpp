@@ -6,7 +6,7 @@
 #include "Node.cpp"
 
 //constructor for MCTSNode
-MCTSNode::MCTSNode(char *paramMaze,  Team *paramTeams, bool paramTeamTakingItsTurn, int paramTimeUntilGasClosing, MCTSNode* pParamParentNode) : Node(paramMaze, paramTeams, paramTeamTakingItsTurn, paramTimeUntilGasClosing){
+MCTSNode::MCTSNode(const Node &rhs, MCTSNode* pParamParentNode) : Node(rhs){
     //init all pointers to null
     for (int i=0; i < sizeof(pChildNodes)/sizeof(*pChildNodes); i++)
         this->pChildNodes[i] = nullptr;
@@ -117,7 +117,7 @@ tuple<MCTSNode*, double> MCTSNode::selectFromLeaves(bool topOfTreeTeam){
 //expands child at specified index
 void MCTSNode::generateChild(char childIndex){
     //create a new node
-    this->pChildNodes[childIndex] = new MCTSNode(this->maze, this->teams, this->teamTakingItsTurn, this->timeUntilGasClosing, this);
+    this->pChildNodes[childIndex] = new MCTSNode(*this, this);
     //configure it
     this->pChildNodes[childIndex]->configureChild(childIndex);
     this->pChildNodes[childIndex]->pParentNode = this;
@@ -126,7 +126,7 @@ void MCTSNode::generateChild(char childIndex){
 //simulate a game until bottom of the tree and return outcome
 bool MCTSNode::simulate(){
     //copy current node into simulation node
-    MCTSNode simulationNode(this->maze, this->teams, this->teamTakingItsTurn, this->timeUntilGasClosing, nullptr);
+    MCTSNode simulationNode(*this, nullptr);
     while (!simulationNode.isTerminal()){
 
         //select random child index (if fight ongoing, only 2 children are possible)

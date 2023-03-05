@@ -17,6 +17,7 @@
 int main()
 {
     std::cout << "Hello Gorane !" << std::endl;
+    vector<string> teamNames = {"Enemy", "Goranes"};
 
     char simpleMaze[game::NB_OF_MAZE_SQUARES];
     for (int i = 0; i < game::NB_OF_MAZE_SQUARES; i++){
@@ -27,18 +28,7 @@ int main()
              simpleMaze[i] += constants::COIN_MASK;
     }
     int timeUntilGasClosing = game::GAS_CLOSING_INTERVAL;
-    int iteration = 1000;
 
-    /*
-    //with 1 robot per team
-    struct Robot simpleRobotG = {game::GORANE_DEFAULT_LOCATION, 0, true};
-    struct Robot simpleRobotE = {game::ENEMY_DEFAULT_LOCATION, 0, true};
-    Robot simpleRobots[game::NB_OF_ROBOTS];
-    simpleRobots[constants::GORANE_TEAM] = simpleRobotG;
-    simpleRobots[constants::ENEMY_TEAM] = simpleRobotE;
-    */
-
-    //with 2 robots per team
     struct Robot G1 = {game::GORANE1_DEFAULT_LOCATION, 0, true};
     struct Robot G2 = {game::GORANE2_DEFAULT_LOCATION, 0, true};
     struct Robot E1 = {game::ENEMY1_DEFAULT_LOCATION, 0, true};
@@ -66,14 +56,14 @@ int main()
     //id of team playing first
     bool bTeamId = constants::ENEMY_TEAM;
 
-    //time at start of the game
-    int startTime = 0;
+    //init node
+    Node myNode = Node(simpleMaze, teams, bTeamId, timeUntilGasClosing);
 
-    vector<string> teamNames = {"Enemy", "Goranes"};
-
+    //init MCTS Node
+    int iteration = 1000;
     //init game state
-    MCTSNode mctsNode = MCTSNode(simpleMaze,teams,bTeamId,timeUntilGasClosing, nullptr);
-
+    MCTSNode mctsNode = MCTSNode(myNode, nullptr);
+    
     mctsNode.printNode();
 
     while (!mctsNode.isTerminal())

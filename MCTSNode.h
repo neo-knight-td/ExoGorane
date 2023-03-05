@@ -12,7 +12,7 @@ class MCTSNode: public Node {
 
     public :
         //constructor for MCTSNode
-        MCTSNode(char *paramMaze, Team *paramTeams, bool paramTeamTakingItsTurn, int paramTimeUntilGasClosing, MCTSNode* pParamParentNode);
+        MCTSNode(const Node &rhs, MCTSNode* pParamParentNode);
         //TODO : create a destructor !
         ~MCTSNode();
         //returns the best child node from current node based on MCTS algorithm
