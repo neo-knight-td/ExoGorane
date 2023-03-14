@@ -132,10 +132,14 @@ bool MCTSNode::simulate(){
         //select random child index (if fight ongoing, only 2 children are possible)
         //TODO : insert constants values as paramters
         char randomChildIndex;
-        if (this->isCombatOngoing)
-            randomChildIndex = std::experimental::randint(0, 1);
+        if (simulationNode.isCombatOngoing)
+            randomChildIndex = std::experimental::randint(-1, 0);
         else
-            randomChildIndex = std::experimental::randint(1, game::BRANCHING_FACTOR - 1);
+            randomChildIndex = std::experimental::randint(-1, game::BRANCHING_FACTOR - 2);
+
+        //need to see if we are in a tunnel to update cannot turn back
+        //TODO : investigate to change this
+        simulationNode.getDescendanceSize();
 
         //set random child index to next valid child index
         simulationNode.setToNextLegalChildIndex(&randomChildIndex);
@@ -144,7 +148,7 @@ bool MCTSNode::simulate(){
         simulationNode.configureChild(randomChildIndex);
 
         //NOTE : debug purpose only
-        //simulationNode.printNode();
+        simulationNode.printNode();
     }
 
     return simulationNode.getNodeValue();

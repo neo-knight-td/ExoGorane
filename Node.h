@@ -8,6 +8,8 @@ struct Robot{
     int location = 0;
     int coinNb = 0;
     bool isAlive = false;
+    int previousLocation = -1000;
+    bool cannotTurnBack = false;
 };
 
 class Team{
@@ -15,7 +17,7 @@ class Team{
         //create a team with 2 robots
         Robot robots[game::NB_OF_ROBOTS_PER_TEAM];
         int coinNb = 0;
-        int isAlive = false;
+        bool isAlive = false;
         bool robotTakingItsTurn = false;
 
     public :

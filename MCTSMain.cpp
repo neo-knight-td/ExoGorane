@@ -60,7 +60,7 @@ int main()
     Node myNode = Node(simpleMaze, teams, bTeamId, timeUntilGasClosing);
 
     //init MCTS Node
-    int iteration = 1000;
+    int iteration = 100;
     //init game state
     MCTSNode mctsNode = MCTSNode(myNode, nullptr);
     
@@ -68,18 +68,24 @@ int main()
 
     while (!mctsNode.isTerminal())
     {
-        std:cout << "Turn to " << teamNames[mctsNode.teamTakingItsTurn] << " team." << endl;
-        auto begin = std::chrono::high_resolution_clock::now();
+        if (mctsNode.isCombatOngoing){
+            //random kill one of the robots in combat
+            selectedChildIndex = std::experimental::randint(0, 1);
+        }
 
-        //compute minimax value & move to minimax
-        std::tie(valueOfMCTS, selectedChildIndex) = mctsNode.runMCTS(iteration, mctsNode.teamTakingItsTurn);
-        
-        auto end = std::chrono::high_resolution_clock::now();
-        auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - begin);
+        else {
+            std:cout << "Turn to " << teamNames[mctsNode.teamTakingItsTurn] << " team." << endl;
+            auto begin = std::chrono::high_resolution_clock::now();
 
-        std::cout << "Robot " << teamNames[mctsNode.teamTakingItsTurn] << " should move to "<< mctsNode.getLocationIncrement(selectedChildIndex) << "." << std::endl;
-        std::cout << "Computing time was " << elapsed.count() << " microseconds" << endl;
+            //compute minimax value & move to minimax
+            std::tie(valueOfMCTS, selectedChildIndex) = mctsNode.runMCTS(iteration, mctsNode.teamTakingItsTurn);
+            
+            auto end = std::chrono::high_resolution_clock::now();
+            auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - begin);
 
+            std::cout << "Robot " << teamNames[mctsNode.teamTakingItsTurn] << " should move to "<< mctsNode.getLocationIncrement(selectedChildIndex) << "." << std::endl;
+            std::cout << "Computing time was " << elapsed.count() << " microseconds" << endl;
+        }
         //update node
         mctsNode.configureChild(selectedChildIndex);
 

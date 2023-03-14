@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------------
 //NOTE : make sure to include the correct constants ! It will define all the game parameters
-#include "FourRobotsLargeMaze.h"
+#include "FourRobotsRegularMaze.h"
 //--------------------------------------------------------------------------------------------
 #include "Constants.h"
 #include <iostream>
@@ -13,11 +13,12 @@
 #include "MinimaxNode.cpp"
 #include <cmath>
 #include <chrono>
+#include <experimental/random>
 
 int main()
 {
     std::cout << "Hello Gorane !" << std::endl;
-    vector<string> teamNames = {"Enemy", "Goranes"};
+    vector<string> teamNames = {"E","R","G","H"};
 
     char simpleMaze[game::NB_OF_MAZE_SQUARES];
     for (int i = 0; i < game::NB_OF_MAZE_SQUARES; i++){
@@ -30,21 +31,22 @@ int main()
         
     int timeUntilGasClosing = game::GAS_CLOSING_INTERVAL;
 
-    struct Robot G1 = {game::GORANE1_DEFAULT_LOCATION, 0, true};
-    struct Robot G2 = {game::GORANE2_DEFAULT_LOCATION, 0, true};
-    struct Robot E1 = {game::ENEMY1_DEFAULT_LOCATION, 0, true};
+    struct Robot E1 = {game::ENEMY1_DEFAULT_LOCATION, 0, false};
     struct Robot E2 = {game::ENEMY2_DEFAULT_LOCATION, 0, true};
+    struct Robot G1 = {game::GORANE1_DEFAULT_LOCATION, 0, false};
+    struct Robot G2 = {game::GORANE2_DEFAULT_LOCATION, 0, true};
 
-    Robot goraneRobots[game::NB_OF_ROBOTS_PER_TEAM];
     Robot enemyRobots[game::NB_OF_ROBOTS_PER_TEAM];
+    Robot goraneRobots[game::NB_OF_ROBOTS_PER_TEAM];
 
-    goraneRobots[constants::GORANE1_INDEX] = G1;
-    goraneRobots[constants::GORANE2_INDEX] = G2;
+
     enemyRobots[constants::ENEMY1_INDEX] = E1;
     enemyRobots[constants::ENEMY2_INDEX] = E2;
+    goraneRobots[constants::GORANE1_INDEX] = G1;
+    goraneRobots[constants::GORANE2_INDEX] = G2;
 
-    Team goraneTeam(goraneRobots);
     Team enemyTeam(enemyRobots);
+    Team goraneTeam(goraneRobots);
 
     Team teams[game::NB_OF_TEAMS];
 
@@ -63,7 +65,7 @@ int main()
     //current depth
     int depth = 0;
     //max depth
-    int maxDepth = 10 *4 -1;
+    int maxDepth = 3;
     
     MinimaxNode minimaxNode = MinimaxNode(myNode, depth, maxDepth);
 
@@ -75,9 +77,9 @@ int main()
             //random kill one of the robots in combat
             indexToMinimax = std::experimental::randint(0, 1);
         }
-
+        
         else {
-            std:cout << "Turn to " << teamNames[minimaxNode.teamTakingItsTurn] << " team." << endl;
+            std:cout << "Turn to " << teamNames[(int) minimaxNode.teamTakingItsTurn*2 + (int) minimaxNode.teams[minimaxNode.teamTakingItsTurn].robotTakingItsTurn] << " robot." << endl;
             auto begin = std::chrono::high_resolution_clock::now();
 
             //compute minimax value & index to minimax
@@ -98,5 +100,6 @@ int main()
     }
 
     std::cout << "Game Over" << endl;
+    std::cout << minimaxNode.getNodeValue() << endl;
     
 }

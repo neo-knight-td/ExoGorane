@@ -55,31 +55,36 @@ Node::Node(const Node &rhs){
 
 void Node::configureRobotsLocationInChildNode(int locationIncrement)
 {
-    // adapt the robot's location in child node
-    this->teams[this->teamTakingItsTurn].robots[this->teams[this->teamTakingItsTurn].robotTakingItsTurn].location += locationIncrement;
+    // save robot taking turn (because will be re used multiple times in the function)
+    bool robotTakingItsTurn = this->teams[this->teamTakingItsTurn].robotTakingItsTurn;
 
-    // record new location of robot taking the turn
-    int robotLocation = this->teams[this->teamTakingItsTurn].robots[this->teams[this->teamTakingItsTurn].robotTakingItsTurn].location;
+    // adapt the robot's previous & acutal location in child node
+    this->teams[this->teamTakingItsTurn].robots[robotTakingItsTurn].previousLocation = this->teams[this->teamTakingItsTurn].robots[robotTakingItsTurn].location;
+    this->teams[this->teamTakingItsTurn].robots[robotTakingItsTurn].location += locationIncrement;
 
-    
+    // save new location of robot taking the turn (because will be re used multiple times in the function)
+    int robotLocation = this->teams[this->teamTakingItsTurn].robots[robotTakingItsTurn].location;
+
     int otherTeamFirstRobotLocation = this->teams[!this->teamTakingItsTurn].robots[false].location;
+    bool otherTeamFirstRobotisAlive = this->teams[!this->teamTakingItsTurn].robots[false].isAlive;
     int otherTeamSecondRobotLocation = this->teams[!this->teamTakingItsTurn].robots[true].location;
+    bool otherTeamSecondRobotisAlive = this->teams[!this->teamTakingItsTurn].robots[false].isAlive;
 
-    //if new robot's position coincides with position of first robot from other team
-    if(robotLocation == otherTeamFirstRobotLocation){
+    //if new robot's position coincides with position of first robot from other team (and it's alive)
+    if(otherTeamFirstRobotisAlive && robotLocation == otherTeamFirstRobotLocation){
         //combat is ongoing
         this->isCombatOngoing = true;
         //fill in robots in combat
-        this->robotsInCombat[this->teamTakingItsTurn] = this->teams[this->teamTakingItsTurn].robotTakingItsTurn;
+        this->robotsInCombat[this->teamTakingItsTurn] = robotTakingItsTurn;
         this->robotsInCombat[!this->teamTakingItsTurn] = false;
 
     }
-    //else if new robot's position coincides with position of second robot from other team
-    else if(robotLocation == otherTeamSecondRobotLocation){
+    //else if new robot's position coincides with position of second robot from other team (and it's alive)
+    else if(otherTeamSecondRobotisAlive && robotLocation == otherTeamSecondRobotLocation){
         //combat is ongoing
         this->isCombatOngoing = true;
         //fill in robots in combat
-        this->robotsInCombat[this->teamTakingItsTurn] = this->teams[this->teamTakingItsTurn].robotTakingItsTurn;
+        this->robotsInCombat[this->teamTakingItsTurn] = robotTakingItsTurn;
         this->robotsInCombat[!this->teamTakingItsTurn] = true;
     }
 
@@ -316,22 +321,25 @@ void Node::configureChild(char childIndex)
 // returns the number of children from the current node (number of legal moves from the current node)
 char Node::getDescendanceSize()
 {
-    char descendanceSize = 0;
-
-    //if current node is a lottery node (a fight is ongoing), there is a fixed number of oucomes possible
+    //if state is terminal, descendance is zero
+    if (this->isTerminal()){
+        return 0;
+    }
+    //if current node is a lottery node (a combat is ongoing), there is a fixed number of oucomes possible
     if (this->isCombatOngoing){
-        //NOTE : let's suppose there are two outcomes to a fight. Either gorane or enemy robot die !
+        //NOTE : let's suppose there are two outcomes to a combat. Either gorane or enemy robot dies !
         //TODO : may be interesting to think of a 3rd & 4th oucome : both die or both stay alive
-        descendanceSize = 2;
+
+        return 2;
     }
 
     //if no fight is ongoing, just return the number of moves that are possible
     else{
+        char descendanceSize = 0;
         // retrieve maze square on which robot taking its turn is located
         char mazeSquare = this->maze[this->teams[this->teamTakingItsTurn].robots[this->teams[this->teamTakingItsTurn].robotTakingItsTurn].location];
-        
 
-        if (mazeSquare & constants::UP_MASK)
+        if ((mazeSquare & constants::UP_MASK))
         {
             descendanceSize++;
         }
@@ -350,15 +358,33 @@ char Node::getDescendanceSize()
         {
             descendanceSize++;
         }
+
+        //if in tunnel and robot has a valid previous location 
+        if (descendanceSize == 2 && this->teams[this->teamTakingItsTurn].robots[this->teams[this->teamTakingItsTurn].robotTakingItsTurn].previousLocation >= 0){
+            //record that robot cannot turn back in the tunnel
+            //TODO : think back where this line should be added (MCTS does not call getDescendanceSize)
+            //TODO : add conditions before adding this
+
+            //NOTE : next two lines (if commented) are setting cannot turn back to off !
+            //this->teams[this->teamTakingItsTurn].robots[this->teams[this->teamTakingItsTurn].robotTakingItsTurn].cannotTurnBack = true;
+            //return 1;
+
+            return descendanceSize;
+        }
+
+        else{
+            //record that robot can turn back again
+            this->teams[this->teamTakingItsTurn].robots[this->teams[this->teamTakingItsTurn].robotTakingItsTurn].cannotTurnBack = false;
+            return descendanceSize;
+        }
     }
 
-    return descendanceSize;
 }
 
 // this function sets value of child index to the next legal child index
 void Node::setToNextLegalChildIndex(char *pChildIndex)
-{   
-    //TODO : add code if lottery node
+{ 
+
     if (this->isCombatOngoing){
         if (*pChildIndex <= -1){
             *pChildIndex = 0;
@@ -371,11 +397,58 @@ void Node::setToNextLegalChildIndex(char *pChildIndex)
         else {
             std::cout << "ERROR : trying to access child that does not exist when Combat is ongoing." << std::endl;
         }
+
+        return;
+    }
+
+    else if(this->teams[this->teamTakingItsTurn].robots[this->teams[this->teamTakingItsTurn].robotTakingItsTurn].cannotTurnBack){
+
+        // current location of robot taking its turn
+        int robotLocation = this->teams[this->teamTakingItsTurn].robots[this->teams[this->teamTakingItsTurn].robotTakingItsTurn].location;
+        // retrieve maze square on which robot taking its turn is located
+        char mazeSquare = this->maze[robotLocation];
+        // current previous location of robot taking its turn
+        int robotPreviousLocation = this->teams[this->teamTakingItsTurn].robots[this->teams[this->teamTakingItsTurn].robotTakingItsTurn].previousLocation;
+
+        // TODO : add default child (child index 0)
+        if (*pChildIndex <= 0 && (mazeSquare & constants::UP_MASK) && (robotLocation -1 != robotPreviousLocation))
+        {
+            *pChildIndex = 1;
+        }
+
+        else if (*pChildIndex <= 1 && (mazeSquare & constants::DOWN_MASK) && (robotLocation +1  != robotPreviousLocation))
+        {
+            *pChildIndex = 2;
+        }
+
+        else if (*pChildIndex <= 2 && (mazeSquare & constants::LEFT_MASK) && (robotLocation - game::MAZE_WIDTH != robotPreviousLocation))
+        {
+            *pChildIndex = 3;
+        }
+
+        else if (*pChildIndex <= 3 && (mazeSquare & constants::RIGHT_MASK) && (robotLocation + game::MAZE_WIDTH != robotPreviousLocation))
+        {
+            *pChildIndex = 4;
+        }
+
+        // if previous index was equal to 4, reset value of child Index and call function again (required for MCTS)
+        else if (*pChildIndex <= 4)
+        {
+            *pChildIndex = -1;
+            setToNextLegalChildIndex(pChildIndex);
+        }
+        else
+        {
+            std::cout << "ERROR : trying to access child that does not exist." << std::endl;
+        }
     }
 
     else{
+
+        // current location of robot taking its turn
+        int robotLocation = this->teams[this->teamTakingItsTurn].robots[this->teams[this->teamTakingItsTurn].robotTakingItsTurn].location;
         // retrieve maze square on which robot taking its turn is located
-        char mazeSquare = this->maze[this->teams[this->teamTakingItsTurn].robots[this->teams[this->teamTakingItsTurn].robotTakingItsTurn].location];
+        char mazeSquare = this->maze[robotLocation];
 
         // TODO : add default child (child index 0)
         if (*pChildIndex <= 0 && (mazeSquare & constants::UP_MASK))
@@ -407,6 +480,7 @@ void Node::setToNextLegalChildIndex(char *pChildIndex)
         {
             std::cout << "ERROR : trying to access child that does not exist." << std::endl;
         }
+        
     }
 
 }
@@ -505,7 +579,7 @@ void Node::printNode()
     string deadE1 = "e";
     string deadE2 = "r";
     string deadRobots[4] = {deadE1, deadE2, deadG1, deadG2};
-    string coin = "$";
+    string coin = ".";
     string coinInGas = "€";
 
     // only works with a squared number of mazes

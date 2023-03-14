@@ -234,13 +234,13 @@ namespace game
     // branching factor is 5 for the moment (2 robot per team)
     inline const int BRANCHING_FACTOR = 5;
     // define G1 default initial location
-    inline const int GORANE1_DEFAULT_LOCATION = 0;
+    inline const int GORANE1_DEFAULT_LOCATION = 195-6;
     // define G2 default initial location
-    inline const int GORANE2_DEFAULT_LOCATION = 13;
+    inline const int GORANE2_DEFAULT_LOCATION = 97;
     // define E1 default initial location
-    inline const int ENEMY1_DEFAULT_LOCATION = 195-13;
+    inline const int ENEMY1_DEFAULT_LOCATION = 6;
     // define E2 default initial location
-    inline const int ENEMY2_DEFAULT_LOCATION = 195;
+    inline const int ENEMY2_DEFAULT_LOCATION = 98;
     // define interval at which gas closes
     inline const int GAS_CLOSING_INTERVAL = 3;
 
