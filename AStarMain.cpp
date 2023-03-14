@@ -20,7 +20,7 @@ int main()
     std::cout << "Hello Gorane !" << std::endl;
     vector<string> teamNames = {"E","R","G","H"};
 
-    int posH = 11;
+    int posH = 17;
 
     char simpleMaze[game::NB_OF_MAZE_SQUARES];
     for (int i = 0; i < game::NB_OF_MAZE_SQUARES; i++){
@@ -66,15 +66,17 @@ int main()
     
     char indexToAStar;
     int costToAStar;
-    //AStarNode aStarNode = AStarNode(myNode, nullptr, 0, true);
-    
+    AStarNode aStarNode = AStarNode(myNode, nullptr, 0, true);
+    /*
     AStarNode aStarNode = AStarNode(myNode, nullptr, 0, false);
 
+    
     aStarNode.modifyToMazeWithOneCoin();
     int costToLonelyCoin;
     int indexToLonelyCoin;
 
     std::tie(costToLonelyCoin, indexToLonelyCoin) = aStarNode.runAStar();
+    */
 
     aStarNode.printNode();
 

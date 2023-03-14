@@ -89,6 +89,7 @@ class Node
 
         void countCoinsOnGround();
         bool isTerminal();
+        bool areAllRobotsDead();
         double evaluate();
         double getNodeValue();
         void printNode();

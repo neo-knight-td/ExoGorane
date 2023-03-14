@@ -321,10 +321,11 @@ void Node::configureChild(char childIndex)
 // returns the number of children from the current node (number of legal moves from the current node)
 char Node::getDescendanceSize()
 {
-    //if state is terminal, descendance is zero
+    //if state is terminal, descendance size is zero
     if (this->isTerminal()){
         return 0;
     }
+
     //if current node is a lottery node (a combat is ongoing), there is a fixed number of oucomes possible
     if (this->isCombatOngoing){
         //NOTE : let's suppose there are two outcomes to a combat. Either gorane or enemy robot dies !
@@ -517,11 +518,15 @@ bool Node::isTerminal()
     // if no more coins on the ground
     if (this->coinsOnGround == 0)
         return true;
-    // if both teams are dead
-    else if (!this->teams[constants::GORANE_TEAM].isAlive && !this->teams[constants::ENEMY_TEAM].isAlive)
+    // if all robots are dead
+    else if (areAllRobotsDead())
         return true;
     else
         return false;
+}
+
+bool Node::areAllRobotsDead(){
+    return (!this->teams[constants::GORANE_TEAM].isAlive && !this->teams[constants::ENEMY_TEAM].isAlive);
 }
 
 void Node::countCoinsOnGround()

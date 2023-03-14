@@ -51,10 +51,14 @@ tuple<int, char> AStarNode::runAStar(){
 
         //select the node from all leaves that minimizes the costs
         std:tie(pSelectedLeafNode, costToSelectedNode) = selectFromLeaves();
+
+        //if costToSelectedNode is invalid (>= 1000), no solution was found
+        if(costToSelectedNode >= 1000)
+            return {-1, -1};
         
         //NOTE : debug purpose only
-        std::cout << "Following node costs "<< costToSelectedNode << " :" << endl;
-        pSelectedLeafNode->printNode();
+        //std::cout << "Following node costs "<< costToSelectedNode << " :" << endl;
+        //pSelectedLeafNode->printNode();
 
     }
     while(!pSelectedLeafNode->AStarNode::isTerminal());
@@ -107,8 +111,8 @@ tuple<AStarNode*, int> AStarNode::selectFromLeaves(){
             }
             //perform selection from child node then return best leaf and associated cost
             std::tie(pLeafNode, cost) = pChildNode->selectFromLeaves();
-            //if better cost is found update the values to minimize
-            if (cost < minCost){
+            //if better cost is found and that all robots are not dead in that node then select the leaf node
+            if (cost < minCost && !(pLeafNode->areAllRobotsDead())){
                 pSelectedLeafNode = pLeafNode;
                 minCost = cost;
             }
@@ -157,9 +161,14 @@ int AStarNode::getResidualCost(){
     //TODO : may be tuned
     residualCost += costForDistanceToBorder;
 
+    //if the currently selected node does not allow to reach center of maze (escape the gas), add cost of 1000 ==> the node
+    //should never be chosen !
+    if (!isPossibleToReachMazeCenter()){
+        residualCost += 1000;
+    }
+
     //TODO : add some conditions...
-
-
+        
     return residualCost;
 }
 
@@ -264,7 +273,14 @@ bool AStarNode::isPossibleToReachMazeCenter(){
     int costToLonelyCoin;
     int indexToLonelyCoin;
 
+    //run A Star
     std::tie(costToLonelyCoin, indexToLonelyCoin) = nodeWithOneCoin.runAStar();
+
+    //if no solution was found, invalid value of -1 is returned
+    if (costToLonelyCoin == -1)
+        return false;
+    else
+        return true;
 }
 
 void AStarNode::setClusterIdInNeighbours(int coinClusters[], int i, int clusterId){
