@@ -63,8 +63,8 @@ int main()
     Node myNode = Node(simpleMaze, teams, bTeamId, timeUntilGasClosing);
 
     //init minimax node
-    int valueOfMinimax;
-    char indexToMinimax;
+    int valueOfMinimax; // TO COMMENT
+    char indexToMinimax; // TO COMMENT
     //current depth
     int depth = 0;
     //max depth
@@ -102,7 +102,7 @@ int main()
         minimaxNode.printNode();
     }
 
-    std::cout << "Game Over" << endl;
+    std::cout << "The end" << endl;
     std::cout << minimaxNode.getNodeValue() << endl;
     
 }
