@@ -20,9 +20,11 @@ int main()
     std::cout << "Hello Gorane !" << std::endl;
     vector<string> teamNames = {"E","R","G","H"};
 
-    char simpleMaze[game::NB_OF_MAZE_SQUARES];
+    char simpleMaze[game::NB_OF_MAZE_SQUARES]; // Create tab of size Nb_of_maze defined in game (namespace)
+    
+    
     for (int i = 0; i < game::NB_OF_MAZE_SQUARES; i++){
-        simpleMaze[i] = game::MAZE[i];
+        simpleMaze[i] = game::MAZE[i]; //Copy initial maze defined in game
 
         //add a coin on all squares except those on which a robot lies
         if (i != game::ENEMY1_DEFAULT_LOCATION && i != game::ENEMY2_DEFAULT_LOCATION && i != game::GORANE1_DEFAULT_LOCATION && i != game::GORANE2_DEFAULT_LOCATION)
@@ -31,6 +33,7 @@ int main()
         
     int timeUntilGasClosing = game::GAS_CLOSING_INTERVAL;
 
+    //Initie les Teams
     struct Robot E1 = {game::ENEMY1_DEFAULT_LOCATION, 0, false};
     struct Robot E2 = {game::ENEMY2_DEFAULT_LOCATION, 0, true};
     struct Robot G1 = {game::GORANE1_DEFAULT_LOCATION, 0, false};
@@ -53,7 +56,7 @@ int main()
     teams[constants::GORANE_TEAM] = goraneTeam;
     teams[constants::ENEMY_TEAM] = enemyTeam;
 
-    //id of team playing first
+    //Our time to play ? True or False
     bool bTeamId = constants::ENEMY_TEAM;
 
     //init node
