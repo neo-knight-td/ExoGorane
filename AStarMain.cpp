@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------------
 //NOTE : make sure to include the correct constants ! It will define all the game parameters
-#include "FourRobotsRegularMaze.h"
+#include "FourRobotsLargeMaze.h"
 //--------------------------------------------------------------------------------------------
 #include "Constants.h"
 #include <cstdlib>
@@ -20,23 +20,22 @@ int main()
     std::cout << "Hello Gorane !" << std::endl;
     vector<string> teamNames = {"E","R","G","H"};
 
-    int posH = 17;
+    //Initie les Teams
+    struct Robot E1 = {game::ENEMY1_DEFAULT_LOCATION, 0, false};
+    struct Robot E2 = {game::ENEMY2_DEFAULT_LOCATION, 0, false};
+    struct Robot G1 = {game::GORANE1_DEFAULT_LOCATION, 0, false};
+    struct Robot G2 = {game::GORANE2_DEFAULT_LOCATION, 0, true};
 
     char simpleMaze[game::NB_OF_MAZE_SQUARES];
     for (int i = 0; i < game::NB_OF_MAZE_SQUARES; i++){
         simpleMaze[i] = game::MAZE[i];
 
         //add a coin on all squares except those on which a robot lies
-        if (abs(posH%game::MAZE_WIDTH - i%game::MAZE_WIDTH) + abs(posH/game::MAZE_WIDTH - i/game::MAZE_WIDTH) <= 4 && abs(posH%game::MAZE_WIDTH - i%game::MAZE_WIDTH) + abs(posH/game::MAZE_WIDTH - i/game::MAZE_WIDTH) > 0)
+        if (abs(G2.location%game::MAZE_WIDTH - i%game::MAZE_WIDTH) + abs(G2.location/game::MAZE_WIDTH - i/game::MAZE_WIDTH) <= 13 && abs(G2.location%game::MAZE_WIDTH - i%game::MAZE_WIDTH) + abs(G2.location/game::MAZE_WIDTH - i/game::MAZE_WIDTH) > 0)
              simpleMaze[i] += constants::COIN_MASK;
     }
         
     int timeUntilGasClosing = game::GAS_CLOSING_INTERVAL;
-
-    struct Robot E1 = {0, 0, false};
-    struct Robot E2 = {6, 0, false};
-    struct Robot G1 = {12, 0, false};
-    struct Robot G2 = {posH, 0, true};
 
     Robot enemyRobots[game::NB_OF_ROBOTS_PER_TEAM];
     Robot goraneRobots[game::NB_OF_ROBOTS_PER_TEAM];
@@ -95,6 +94,7 @@ int main()
         auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - begin);
 
         std::cout << "Robot " << teamNames[aStarNode.teamTakingItsTurn] << " should move to "<< aStarNode.getLocationIncrement(indexToAStar) << "." << std::endl;
+        std::cout << "Associated cost is " << costToAStar << endl;
         std::cout << "Computing time was " << elapsed.count() << " microseconds" << endl;
 
         //update node

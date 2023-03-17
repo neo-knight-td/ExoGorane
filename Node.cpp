@@ -562,10 +562,10 @@ double Node::getNodeValue()
         return constants::MIN_NODE_VALUE;
 }
 
-bool isSquareInTheGas(int location){
+bool Node::isSquareInTheGas(int location){
     bool isSquareInTheGas = false;
 
-    if (this.maze[location] & constants::GAS_MASK)
+    if (this->maze[location] & constants::GAS_MASK)
         isSquareInTheGas = true;
 
     return isSquareInTheGas;

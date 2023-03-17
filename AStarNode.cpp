@@ -1,6 +1,14 @@
+/*
+    AStarNode is a Node applying A Star algorithm to collect as many coins as possible in an AOB.
+    AStarNode considers any state to be a goal state if a coin is eaten in this state and that robot is alive after eating the coin.
+    The AStar algorithm is launched from the AStarNode using function runAStar(). It will return the best move (and associated cost)
+    to the goal state.
+    If no goal state is found, the runAStar() function will return the value -1.
+*/
 #include <iostream>
 #include <algorithm>
 #include <cstdlib>
+#include <chrono>
 #include "AStarNode.h"
 #include "Node.h"
 #include "Node.cpp"
@@ -63,6 +71,9 @@ tuple<int, char> AStarNode::runAStar(){
     }
     while(!pSelectedLeafNode->AStarNode::isTerminal());
 
+    //make sure path to a star bool is set to false in all nodes from the tree
+    deletePathToAStar();
+
     //Backtrack path to A Star
     pSelectedLeafNode->backTrackPathToAStar();
 
@@ -73,9 +84,11 @@ tuple<int, char> AStarNode::runAStar(){
         //update child index
         setToNextLegalChildIndex(&childIndex);
 
-        if (this->pChildNodes[childIndex]->isOnPathToAStar)
+        if (this->pChildNodes[childIndex]->isOnPathToAStar){
+            //deletePathToAStar();
+            //TODO : OPTI do not recompute cost here ! This May indeed re run A Star and consume time
             return {pSelectedLeafNode->getCost(),childIndex};
-
+        }
     }
 
 }
@@ -111,7 +124,7 @@ tuple<AStarNode*, int> AStarNode::selectFromLeaves(){
             }
             //perform selection from child node then return best leaf and associated cost
             std::tie(pLeafNode, cost) = pChildNode->selectFromLeaves();
-            //if better cost is found and that all robots are not dead in that node then select the leaf node
+            //if better cost is found (and we do not die in this node)
             if (cost < minCost && !(pLeafNode->areAllRobotsDead())){
                 pSelectedLeafNode = pLeafNode;
                 minCost = cost;
@@ -149,7 +162,27 @@ bool AStarNode::isLeafNode(){
 
 //get residual cost value (cost after a terminal state is reached)
 int AStarNode::getResidualCost(){
+
     int residualCost = 0;
+
+    bool robotTakingItsTurn = this->teams[this->teamTakingItsTurn].robotTakingItsTurn;
+    int robotLocation = this->teams[this->teamTakingItsTurn].robots[robotTakingItsTurn].location;
+
+    //if robot is in the gas at this location
+    if(isSquareInTheGas(robotLocation)){
+        //add 1000 to cost & return --> the node should never be chosen !
+        residualCost += 1000;
+        return residualCost;
+    }
+        
+    //if the currently selected node does not allow to reach center of maze (gas traps him before), add cost of 1000 ==> the node
+    //should never be chosen !
+    //TODO : OPTI is highly time consuming. Try to launch it only if certain conditions are met (TimeUntilGasClosure below certain threshold ?)
+    if (!isPossibleToReachMazeCenter()){
+        residualCost += 1000;
+        return residualCost;
+    }
+
     //if number of clusters increases
     if (getNumberOfCoinClusters() > this->pParentNode->getNumberOfCoinClusters()){
         //TODO : may be tuned
@@ -157,15 +190,10 @@ int AStarNode::getResidualCost(){
     }
     
     //if not on a border, add cost (the higher the distance to the border the higher the cost)
+    //TODO : OPTI cost should be revised. Only proportionnal leads to large search space (degressive relation ? Only reward if next to border ?)
     int costForDistanceToBorder = getDistanceToBorder() - 1;
     //TODO : may be tuned
     residualCost += costForDistanceToBorder;
-
-    //if the currently selected node does not allow to reach center of maze (escape the gas), add cost of 1000 ==> the node
-    //should never be chosen !
-    if (!isPossibleToReachMazeCenter()){
-        residualCost += 1000;
-    }
 
     //TODO : add some conditions...
         
@@ -185,7 +213,6 @@ int AStarNode::getHeuristicValue(){
         else
             return 0;
     }
-        
 }
 
 //get total cost value
@@ -197,8 +224,12 @@ int AStarNode::getCost(){
 bool AStarNode::isTerminal()
 {
     // if a coin was found (we have less coins than in parent node)
-    if (this->pParentNode != nullptr && this->coinsOnGround < this->pParentNode->coinsOnGround)
+    if (this->pParentNode != nullptr && this->coinsOnGround < this->pParentNode->coinsOnGround && !areAllRobotsDead())
         return true;
+    /*
+    else if (areAllRobotsDead())
+        return true;
+    */
     else
         return false;
 }
@@ -207,6 +238,15 @@ void AStarNode::backTrackPathToAStar(){
     this->isOnPathToAStar = true;
     if (this->pParentNode != nullptr)
         this->pParentNode->backTrackPathToAStar();
+}
+
+void AStarNode::deletePathToAStar(){
+    this->isOnPathToAStar = false;
+    for (int i=0; i < sizeof(pChildNodes)/sizeof(*pChildNodes); i++){
+        if (this->pChildNodes[i] != nullptr){
+            this->pChildNodes[i]->deletePathToAStar();
+        }
+    }
 }
 
 int AStarNode::getDistanceToClosestCoin(){
@@ -265,6 +305,16 @@ void AStarNode::modifyToMazeWithOneCoin(){
 }
 
 bool AStarNode::isPossibleToReachMazeCenter(){
+    //check if robot is not already at the maze center
+    bool robotTakingItsTurn = this->teams[this->teamTakingItsTurn].robotTakingItsTurn;
+    int robotLocation = this->teams[this->teamTakingItsTurn].robots[robotTakingItsTurn].location;
+    if(robotLocation == game::NB_OF_MAZE_SQUARES/2 - game::MAZE_WIDTH/2 ||
+    robotLocation == game::NB_OF_MAZE_SQUARES/2 - game::MAZE_WIDTH/2 -1 ||
+    robotLocation == game::NB_OF_MAZE_SQUARES/2 - game::MAZE_WIDTH/2 + game::MAZE_WIDTH ||
+    robotLocation == game::NB_OF_MAZE_SQUARES/2 - game::MAZE_WIDTH/2 + game::MAZE_WIDTH -1 )
+        //if we already are at the center of the maze, return true
+        return true;
+    
     //copy current node except you don't want to compute residual costs in it
     AStarNode nodeWithOneCoin(*this, this, 0, false);
     //set only one coin in the middle of the maze
@@ -273,8 +323,18 @@ bool AStarNode::isPossibleToReachMazeCenter(){
     int costToLonelyCoin;
     int indexToLonelyCoin;
 
+    
+
+    //NOTE : for optimization purposes
+    auto begin = std::chrono::high_resolution_clock::now();
+
     //run A Star
     std::tie(costToLonelyCoin, indexToLonelyCoin) = nodeWithOneCoin.runAStar();
+    
+    auto end = std::chrono::high_resolution_clock::now();
+    auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - begin);
+
+    std::cout << "Computing time for isPossibleToReachMazeCenter() was " << elapsed.count() << " microseconds" << endl;
 
     //if no solution was found, invalid value of -1 is returned
     if (costToLonelyCoin == -1)
