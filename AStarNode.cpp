@@ -1,10 +1,11 @@
 /*
-    AStarNode is a Node applying A Star algorithm to collect as many coins as possible in an AOB.
+    AStarNode is a Node applying A Star algorithm to collect as many coins as possible in an AOR.
     AStarNode considers any state to be a goal state if a coin is eaten in this state and that robot is alive after eating the coin.
     The AStar algorithm is launched from the AStarNode using function runAStar(). It will return the best move (and associated cost)
     to the goal state.
     If no goal state is found, the runAStar() function will return the value -1.
 */
+
 #include <iostream>
 #include <algorithm>
 #include <cstdlib>
@@ -325,12 +326,13 @@ bool AStarNode::isPossibleToReachMazeCenter(){
 
     
 
-    //NOTE : for optimization purposes
+    //NOTE : for optimization purposes, time is recorded (next line can be deleted)
     auto begin = std::chrono::high_resolution_clock::now();
 
     //run A Star
     std::tie(costToLonelyCoin, indexToLonelyCoin) = nodeWithOneCoin.runAStar();
     
+    //NOTE : for optimization purposes, time is recorded (next 3 lines can be deleted)
     auto end = std::chrono::high_resolution_clock::now();
     auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - begin);
 
