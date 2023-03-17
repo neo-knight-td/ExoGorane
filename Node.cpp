@@ -240,7 +240,7 @@ void Node::configureRobotsLivesInChildNode()
     {
         for (int l = 0; l < game::NB_OF_ROBOTS_PER_TEAM; l++)
         {
-            if (this->maze[this->teams[k].robots[l].location] & constants::GAS_MASK)
+            if (isSquareInTheGas(this->teams[k].robots[l].location))
                 this->teams[k].robots[l].isAlive = false;
         }
         this->teams[k].updateLives();
@@ -560,6 +560,15 @@ double Node::getNodeValue()
     // if G collected less coins (or draw), G loses (value is 0)
     else
         return constants::MIN_NODE_VALUE;
+}
+
+bool isSquareInTheGas(int location){
+    bool isSquareInTheGas = false;
+
+    if (this.maze[location] & constants::GAS_MASK)
+        isSquareInTheGas = true;
+
+    return isSquareInTheGas;
 }
 
 void Node::printNode()
