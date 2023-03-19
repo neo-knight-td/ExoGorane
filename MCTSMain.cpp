@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------------
 //NOTE : make sure to include the correct constants ! It will define all the game parameters
-#include "FourRobotsLargeMaze.h"
+#include "FourRobotsRegularMaze.h"
 //--------------------------------------------------------------------------------------------
 #include "Constants.h"
 #include <iostream>
@@ -17,7 +17,7 @@
 int main()
 {
     std::cout << "Hello Gorane !" << std::endl;
-    vector<string> teamNames = {"Enemy", "Goranes"};
+    vector<string> teamNames = {"E","R","G","H"};
 
     char simpleMaze[game::NB_OF_MAZE_SQUARES];
     for (int i = 0; i < game::NB_OF_MAZE_SQUARES; i++){
@@ -60,7 +60,7 @@ int main()
     Node myNode = Node(simpleMaze, teams, bTeamId, timeUntilGasClosing);
 
     //init MCTS Node
-    int iteration = 100;
+    int iteration = 10000;
     //init game state
     MCTSNode mctsNode = MCTSNode(myNode, nullptr);
     
@@ -74,10 +74,10 @@ int main()
         }
 
         else {
-            std:cout << "Turn to " << teamNames[mctsNode.teamTakingItsTurn] << " team." << endl;
+            std:cout << "Turn to " << teamNames[(int) mctsNode.teamTakingItsTurn*2 + (int) mctsNode.teams[mctsNode.teamTakingItsTurn].robotTakingItsTurn] << " robot." << endl;
             auto begin = std::chrono::high_resolution_clock::now();
 
-            //compute minimax value & move to minimax
+            //compute
             std::tie(valueOfMCTS, selectedChildIndex) = mctsNode.runMCTS(iteration, mctsNode.teamTakingItsTurn);
             
             auto end = std::chrono::high_resolution_clock::now();
@@ -94,5 +94,6 @@ int main()
     }
 
     std::cout << "Game Over" << endl;
+    std::cout << "Result is " << mctsNode.getNodeValue() << endl;
 
 }

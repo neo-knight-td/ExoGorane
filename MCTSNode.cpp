@@ -35,10 +35,11 @@ tuple<double, char> MCTSNode::runMCTS(int iterations, bool topOfTreeTeam){
         //select
         MCTSNode *pSelectedLeafNode;
 
-        //if first iteration, select root node. Otherwise select among leaves.
+        //if first iteration, select root node
         if (i == 0)
             pSelectedLeafNode = this;
         else
+        //otherwise select among leaves
             std:tie(pSelectedLeafNode, std::ignore) = selectFromLeaves(topOfTreeTeam);
         
         
@@ -84,33 +85,66 @@ void MCTSNode::search(){
 
 //selects one leaf node from current node based on UCB and return pointer to it (with UCB value)
 tuple<MCTSNode*, double> MCTSNode::selectFromLeaves(bool topOfTreeTeam){
-
-    //if node is leaf
-    if(isLeafNode()){
-        return {this,this->getUCB(topOfTreeTeam)};
-    }
-    else{//if it's not a leaf node, look in child nodes
-        char childIndex = -1;
-        double maxUCB = -1;
-        MCTSNode *pSelectedLeafNode = nullptr;
-
-        for (int i=0; i < getDescendanceSize(); i++){
-            double UCB;
-            MCTSNode *pLeafNode;
-
-            //update childIndex to next valid child Index
-            setToNextLegalChildIndex(&childIndex);
-            //recover child node address
-            MCTSNode *pChildNode = this->pChildNodes[childIndex];
-            //perform selection from child node then return best leaf and associated UCB
-            std::tie(pLeafNode, UCB) = pChildNode->selectFromLeaves(topOfTreeTeam);
-            //if better UCB is found update the values to maximize
-            if (UCB > maxUCB){
-                pSelectedLeafNode = pLeafNode;
-                maxUCB = UCB;
-            }
+    /*
+        Legacy code for selectFromLeaves
+    
+        //if node is leaf
+        if(isLeafNode()){
+            return {this,this->getUCB(topOfTreeTeam)};
         }
-        return {pSelectedLeafNode, maxUCB};
+        else{//if it's not a leaf node, look in child nodes
+            char childIndex = -1;
+            double maxUCB = -1;
+            MCTSNode *pSelectedLeafNode = nullptr;
+
+            for (int i=0; i < getDescendanceSize(); i++){
+                double UCB;
+                MCTSNode *pLeafNode;
+
+                //update childIndex to next valid child Index
+                setToNextLegalChildIndex(&childIndex);
+                //recover child node address
+                MCTSNode *pChildNode = this->pChildNodes[childIndex];
+                //perform selection from child node then return best leaf and associated UCB
+                std::tie(pLeafNode, UCB) = pChildNode->selectFromLeaves(topOfTreeTeam);
+                //if better UCB is found update the values to maximize
+                if (UCB > maxUCB){
+                    pSelectedLeafNode = pLeafNode;
+                    maxUCB = UCB;
+                }
+            }
+            return {pSelectedLeafNode, maxUCB};
+        }
+    */
+
+    char childIndex = -1;
+    double maxUCB = -1;
+    MCTSNode *pSelectedChildNode = nullptr;
+
+    //loop over children to find the one with max UCB
+    for (int i=0; i < getDescendanceSize(); i++){
+
+        //update childIndex to next valid child Index
+        setToNextLegalChildIndex(&childIndex);
+        //recover child node address
+        MCTSNode *pChildNode = this->pChildNodes[childIndex];
+        //get UCB of child node
+        double UCB = pChildNode->getUCB(topOfTreeTeam);
+        //if better UCB is found
+        if (UCB > maxUCB){
+            //select the child node
+            pSelectedChildNode = pChildNode;
+            maxUCB = UCB;
+        }
+    }
+
+    //if the best child is a leaf node, we can end selection here & return address of child found
+    if(pSelectedChildNode->isLeafNode()){
+        return {pSelectedChildNode, pSelectedChildNode->getUCB(topOfTreeTeam)};
+    }
+    //otherwise call this function again from the selected child node
+    else{
+        return pSelectedChildNode->selectFromLeaves(topOfTreeTeam);
     }
 }
 
@@ -148,7 +182,7 @@ bool MCTSNode::simulate(){
         simulationNode.configureChild(randomChildIndex);
 
         //NOTE : debug purpose only
-        simulationNode.printNode();
+        //simulationNode.printNode();
     }
 
     return simulationNode.getNodeValue();
@@ -182,5 +216,5 @@ double MCTSNode::getUCB(bool topOfTreeTeam){
     if (topOfTreeTeam == constants::GORANE_TEAM)
         return (double) this->value / this->visits + sqrt(2 * log(this->pParentNode->visits) / this->visits);
     else
-        return (double) (this->visits - this->value) / this->visits + sqrt(2 * log(this->pParentNode->visits) / this->visits);
+        return (double) (1.0 - this->value) / this->visits + sqrt(2 * log(this->pParentNode->visits) / this->visits);
 }
