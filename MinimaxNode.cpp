@@ -234,7 +234,7 @@ void MinimaxNode :: selectFromChildren(std::function<bool(double,double)> compar
 
         //NOTE : debug purpose only -> bug
         if (this->depth == 0){//(gameState.depthOfState == 2 && gameState.robots[1].location == 23){
-            cout << "Hello" << endl;
+            //cout << "Hello" << endl;
         }
                                             
         //if minimax from current successor is higher, update all values to return

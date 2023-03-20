@@ -34,9 +34,9 @@ int main()
     int timeUntilGasClosing = game::GAS_CLOSING_INTERVAL;
 
     //Initie les Teams
-    struct Robot E1 = {game::ENEMY1_DEFAULT_LOCATION, 0, false};
+    struct Robot E1 = {game::ENEMY1_DEFAULT_LOCATION, 0, true};
     struct Robot E2 = {game::ENEMY2_DEFAULT_LOCATION, 0, true};
-    struct Robot G1 = {game::GORANE1_DEFAULT_LOCATION, 0, false};
+    struct Robot G1 = {game::GORANE1_DEFAULT_LOCATION, 0, true};
     struct Robot G2 = {game::GORANE2_DEFAULT_LOCATION, 0, true};
 
     Robot enemyRobots[game::NB_OF_ROBOTS_PER_TEAM];
@@ -68,7 +68,7 @@ int main()
     //current depth
     int depth = 0;
     //max depth
-    int maxDepth = 3;
+    int maxDepth = 15;
     
     MinimaxNode minimaxNode = MinimaxNode(myNode, depth, maxDepth);
 

@@ -74,7 +74,7 @@ namespace game
     // define E2 default initial location
     inline const int ENEMY2_DEFAULT_LOCATION = 18;
     // define interval at which gas closes
-    inline const int GAS_CLOSING_INTERVAL = 2;
+    inline const int GAS_CLOSING_INTERVAL = 3;
 
 }
 

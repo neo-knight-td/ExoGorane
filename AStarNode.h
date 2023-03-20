@@ -33,6 +33,7 @@ class AStarNode: public Node {
         int getHeuristicValue();
         bool isTerminal();
         void backTrackPathToAStar();
+        void deletePathToAStar();
         int getDistanceToClosestCoin();
         int getResidualCost();
         int getNumberOfCoinClusters();

@@ -10,7 +10,7 @@ namespace game
     // define the number of maze squares
     inline const int NB_OF_MAZE_SQUARES = 196;
     // define total number of coins
-    inline const int NB_OF_COINS = 192;
+    inline const int NB_OF_COINS = 20;
     inline const int MAZE_WIDTH = 14;
     //NOTE : Maze copied from https://youtu.be/QLjniy3HG8o?t=75 (coins to be added)
     inline const char MAZE[NB_OF_MAZE_SQUARES] =
@@ -242,7 +242,7 @@ namespace game
     // define E2 default initial location
     inline const int ENEMY2_DEFAULT_LOCATION = 98;
     // define interval at which gas closes
-    inline const int GAS_CLOSING_INTERVAL = 3;
+    inline const int GAS_CLOSING_INTERVAL = 20;
 
 }
 

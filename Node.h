@@ -92,6 +92,7 @@ class Node
         bool areAllRobotsDead();
         double evaluate();
         double getNodeValue();
+        bool isSquareInTheGas(int location);
         void printNode();
 };
 
