@@ -306,6 +306,7 @@ void Node::configureChild(char childIndex)
     }
     else{
         //kill a robot
+        //NOTE : for debug purposes, next lines might are commented
         this->teams[(childIndex+1)%2].robots[this->robotsInCombat[(childIndex+1)%2]].isAlive = false;
         this->teams[(childIndex+1)%2].updateLives();
 

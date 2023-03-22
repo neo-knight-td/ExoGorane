@@ -60,7 +60,7 @@ int main()
     Node myNode = Node(simpleMaze, teams, bTeamId, timeUntilGasClosing);
 
     //init MCTS Node
-    int iteration = 10000;
+    int iteration = 500;
     //init game state
     MCTSNode mctsNode = MCTSNode(myNode, nullptr);
     
@@ -85,6 +85,7 @@ int main()
 
             std::cout << "Robot " << teamNames[mctsNode.teamTakingItsTurn] << " should move to "<< mctsNode.getLocationIncrement(selectedChildIndex) << "." << std::endl;
             std::cout << "Computing time was " << elapsed.count() << " microseconds" << endl;
+            std::cout << "Time until next gas closure is " << mctsNode.timeUntilGasClosing << endl;
         }
         //update node
         mctsNode.configureChild(selectedChildIndex);
@@ -95,5 +96,7 @@ int main()
 
     std::cout << "Game Over" << endl;
     std::cout << "Result is " << mctsNode.getNodeValue() << endl;
+    std::cout << "Score Gorane Team is " << mctsNode.teams[1].coinNb << endl;
+    std::cout << "Score Enemy Team is " << mctsNode.teams[0].coinNb << endl;
 
 }
