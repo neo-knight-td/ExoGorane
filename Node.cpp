@@ -4,23 +4,27 @@
 
 using namespace std;
 
+//default constructor with no parameter
+Node::Node(){}
+
 // default constructor (should only be called when setting up the game)
 Node::Node(char *paramMaze, Team *paramTeams, bool paramTeamTakingItsTurn, int paramTimeUntilGasClosing)
 {
+    
     // copy maze
-    for (int i = 0; i < game::NB_OF_MAZE_SQUARES; i++)
+    for (int i = 0; i < sizeof(this->maze); i++)
         this->maze[i] = paramMaze[i];
     // copy teams
 
     // TODO : watch this constructor
-    for (int j = 0; j < game::NB_OF_TEAMS; j++)
+    for (int j = 0; j < NB_OF_TEAMS; j++)
     {
         this->teams[j] = paramTeams[j];
     }
 
     this->teamTakingItsTurn = paramTeamTakingItsTurn;
     this->timeUntilGasClosing = paramTimeUntilGasClosing;
-    // this->coinsOnGround = game::NB_OF_COINS;
+    this->gasClosingInterval = paramTimeUntilGasClosing;
     countCoinsOnGround();
 }
 
@@ -28,12 +32,12 @@ Node::Node(char *paramMaze, Team *paramTeams, bool paramTeamTakingItsTurn, int p
 Node::Node(const Node &rhs){
 
     // copy maze
-    for (int i = 0; i < game::NB_OF_MAZE_SQUARES; i++)
+    for (int i = 0; i < sizeof(this->maze); i++)
         this->maze[i] = rhs.maze[i];
     // copy teams
 
     // TODO : watch this constructor
-    for (int j = 0; j < game::NB_OF_TEAMS; j++)
+    for (int j = 0; j < NB_OF_TEAMS; j++)
     {
         this->teams[j] = rhs.teams[j];
     }
@@ -41,9 +45,9 @@ Node::Node(const Node &rhs){
 
     this->teamTakingItsTurn = rhs.teamTakingItsTurn;
     this->timeUntilGasClosing = rhs.timeUntilGasClosing;
+    this->gasClosingInterval = rhs.gasClosingInterval;
     this->gasClosures = rhs.gasClosures;
     this->coinsOnGround = rhs.coinsOnGround;
-    //countCoinsOnGround();
 
     this->isCombatOngoing = rhs.isCombatOngoing;
     //copy robots in combat
@@ -96,18 +100,19 @@ void Node::configureCoinsInChildNode()
 {
     // adapt the coins on ground in child node only if we find a coin on the robot's next location
     /*
-    if (this->maze[this->robots[this->teamTakingItsTurn].location] & constants::COIN_MASK){
+    if (this->maze[this->robots[this->teamTakingItsTurn].location] & COIN_MASK){
         this->robots[this->teamTakingItsTurn].coinNb += 1;
         this->coinsOnGround--;
-        this->maze[this->robots[this->teamTakingItsTurn].location] += -constants::COIN_MASK;
+        this->maze[this->robots[this->teamTakingItsTurn].location] += -COIN_MASK;
     }
     */
-    if (this->maze[this->teams[this->teamTakingItsTurn].robots[this->teams[this->teamTakingItsTurn].robotTakingItsTurn].location] & constants::COIN_MASK)
+
+    if (this->maze[this->teams[this->teamTakingItsTurn].robots[this->teams[this->teamTakingItsTurn].robotTakingItsTurn].location] & COIN_MASK)
     {
         this->teams[this->teamTakingItsTurn].robots[this->teams[this->teamTakingItsTurn].robotTakingItsTurn].coinNb += 1;
         this->teams[this->teamTakingItsTurn].updateCoins();
         this->coinsOnGround--;
-        this->maze[this->teams[this->teamTakingItsTurn].robots[this->teams[this->teamTakingItsTurn].robotTakingItsTurn].location] += -constants::COIN_MASK;
+        this->maze[this->teams[this->teamTakingItsTurn].robots[this->teams[this->teamTakingItsTurn].robotTakingItsTurn].location] += -COIN_MASK;
     }
 }
 
@@ -117,22 +122,22 @@ void Node::configureTimeInChildNode()
     //NOTE : hard coded for 2 robots
 
     // if both teams are alive
-    if (this->teams[constants::ENEMY_TEAM].isAlive && this->teams[constants::GORANE_TEAM].isAlive){
+    if (this->teams[ENEMY_TEAM].isAlive && this->teams[GORANE_TEAM].isAlive){
         
-        bool secondRobotGoraneIsAlive =  this->teams[constants::GORANE_TEAM].robots[constants::GORANE2_INDEX].isAlive;
+        bool secondRobotGoraneIsAlive =  this->teams[GORANE_TEAM].robots[GORANE2_INDEX].isAlive;
         bool robotTakingTurn = this->teams[this->teamTakingItsTurn].robotTakingItsTurn;
 
         //if second robot from gorane team is alive
         if (secondRobotGoraneIsAlive){
             //decrease time only when he has its turn
-            if (this->teamTakingItsTurn == constants::GORANE_TEAM && robotTakingTurn == constants::GORANE2_INDEX){
+            if (this->teamTakingItsTurn == GORANE_TEAM && robotTakingTurn == GORANE2_INDEX){
                 this->timeUntilGasClosing = this->timeUntilGasClosing - 1;
             }
         }
         //if second robot from gorane team is dead
         else {
             //decrease time only when first robot from the team has its turn
-            if (this->teamTakingItsTurn == constants::GORANE_TEAM && robotTakingTurn == constants::GORANE1_INDEX){
+            if (this->teamTakingItsTurn == GORANE_TEAM && robotTakingTurn == GORANE1_INDEX){
                 this->timeUntilGasClosing = this->timeUntilGasClosing - 1;
             }
         }
@@ -182,45 +187,46 @@ void Node::configureGasInChildNode()
         this->gasClosures++;
         // close the gas !
         // flip the gas bit inside all squares that are in the gas
-        for (int h = 0; h < game::NB_OF_MAZE_SQUARES; h++)
+        for (int h = 0; h < NB_OF_MAZE_SQUARES; h++)
         {
             // erase possible moves for first column(s) of the maze
-            if (h < game::MAZE_WIDTH * this->gasClosures)
+            if (h < MAZE_WIDTH * this->gasClosures)
             {
-                if (!(this->maze[h] & constants::GAS_MASK))
+                if (!(this->maze[h] & GAS_MASK))
                 {
-                    this->maze[h] += constants::GAS_MASK;
+                    this->maze[h] += GAS_MASK;
                 }
             }
 
             // erase possible moves for first line(s) of the maze
-            else if (h % game::MAZE_WIDTH < this->gasClosures)
+            else if (h % MAZE_WIDTH < this->gasClosures)
             {
-                if (!(this->maze[h] & constants::GAS_MASK))
+                if (!(this->maze[h] & GAS_MASK))
                 {
-                    this->maze[h] += constants::GAS_MASK;
+                    this->maze[h] += GAS_MASK;
                 }
             }
 
             // erase possible moves for last line(s) of the maze
-            else if (h % game::MAZE_WIDTH >= game::MAZE_WIDTH - this->gasClosures)
+            else if (h % MAZE_WIDTH >= MAZE_WIDTH - this->gasClosures)
             {
-                if (!(this->maze[h] & constants::GAS_MASK))
+                if (!(this->maze[h] & GAS_MASK))
                 {
-                    this->maze[h] += constants::GAS_MASK;
+                    this->maze[h] += GAS_MASK;
                 }
             }
 
             // erase possible moves for the last column(s) of the maze
-            else if (h > game::MAZE_WIDTH * game::MAZE_WIDTH - this->gasClosures * game::MAZE_WIDTH)
+            else if (h > MAZE_WIDTH * MAZE_WIDTH - this->gasClosures * MAZE_WIDTH)
             {
-                if (!(this->maze[h] & constants::GAS_MASK))
+                if (!(this->maze[h] & GAS_MASK))
                 {
-                    this->maze[h] += constants::GAS_MASK;
+                    this->maze[h] += GAS_MASK;
                 }
             }
         }
-        this->timeUntilGasClosing = game::GAS_CLOSING_INTERVAL;
+        //reset time until gas closes
+        this->timeUntilGasClosing = this->gasClosingInterval;
     }
 }
 
@@ -230,15 +236,15 @@ void Node::configureRobotsLivesInChildNode()
         // NOTE : next 4 lines cost about 100 nanoseconds (on Thomas Desktop)
         // TODO : optimize these 4 lines
         /*
-        for (int k=0; k< game::NB_OF_ROBOTS; k++){
-            if(this->maze[this->robots[k].location] & constants::GAS_MASK)
+        for (int k=0; k< NB_OF_ROBOTS; k++){
+            if(this->maze[this->robots[k].location] & GAS_MASK)
                 this->robots[k].isAlive = false;
         }
         */
 
-    for (int k = 0; k < game::NB_OF_TEAMS; k++)
+    for (int k = 0; k < NB_OF_TEAMS; k++)
     {
-        for (int l = 0; l < game::NB_OF_ROBOTS_PER_TEAM; l++)
+        for (int l = 0; l < NB_OF_ROBOTS_PER_TEAMS; l++)
         {
             if (isSquareInTheGas(this->teams[k].robots[l].location))
                 this->teams[k].robots[l].isAlive = false;
@@ -307,8 +313,8 @@ void Node::configureChild(char childIndex)
     else{
         //kill a robot
         //NOTE : for debug purposes, next lines might are commented
-        this->teams[(childIndex+1)%2].robots[this->robotsInCombat[(childIndex+1)%2]].isAlive = false;
-        this->teams[(childIndex+1)%2].updateLives();
+        //this->teams[(childIndex+1)%2].robots[this->robotsInCombat[(childIndex+1)%2]].isAlive = false;
+        //this->teams[(childIndex+1)%2].updateLives();
 
         //update team taking turn
         configureRobotTakingTurnInChildNode();
@@ -341,22 +347,22 @@ char Node::getDescendanceSize()
         // retrieve maze square on which robot taking its turn is located
         char mazeSquare = this->maze[this->teams[this->teamTakingItsTurn].robots[this->teams[this->teamTakingItsTurn].robotTakingItsTurn].location];
 
-        if ((mazeSquare & constants::UP_MASK))
+        if ((mazeSquare & UP_MASK))
         {
             descendanceSize++;
         }
 
-        if (mazeSquare & constants::DOWN_MASK)
+        if (mazeSquare & DOWN_MASK)
         {
             descendanceSize++;
         }
 
-        if (mazeSquare & constants::LEFT_MASK)
+        if (mazeSquare & LEFT_MASK)
         {
             descendanceSize++;
         }
 
-        if (mazeSquare & constants::RIGHT_MASK)
+        if (mazeSquare & RIGHT_MASK)
         {
             descendanceSize++;
         }
@@ -413,22 +419,22 @@ void Node::setToNextLegalChildIndex(char *pChildIndex)
         int robotPreviousLocation = this->teams[this->teamTakingItsTurn].robots[this->teams[this->teamTakingItsTurn].robotTakingItsTurn].previousLocation;
 
         // TODO : add default child (child index 0)
-        if (*pChildIndex <= 0 && (mazeSquare & constants::UP_MASK) && (robotLocation -1 != robotPreviousLocation))
+        if (*pChildIndex <= 0 && (mazeSquare & UP_MASK) && (robotLocation -1 != robotPreviousLocation))
         {
             *pChildIndex = 1;
         }
 
-        else if (*pChildIndex <= 1 && (mazeSquare & constants::DOWN_MASK) && (robotLocation +1  != robotPreviousLocation))
+        else if (*pChildIndex <= 1 && (mazeSquare & DOWN_MASK) && (robotLocation +1  != robotPreviousLocation))
         {
             *pChildIndex = 2;
         }
 
-        else if (*pChildIndex <= 2 && (mazeSquare & constants::LEFT_MASK) && (robotLocation - game::MAZE_WIDTH != robotPreviousLocation))
+        else if (*pChildIndex <= 2 && (mazeSquare & LEFT_MASK) && (robotLocation - MAZE_WIDTH != robotPreviousLocation))
         {
             *pChildIndex = 3;
         }
 
-        else if (*pChildIndex <= 3 && (mazeSquare & constants::RIGHT_MASK) && (robotLocation + game::MAZE_WIDTH != robotPreviousLocation))
+        else if (*pChildIndex <= 3 && (mazeSquare & RIGHT_MASK) && (robotLocation + MAZE_WIDTH != robotPreviousLocation))
         {
             *pChildIndex = 4;
         }
@@ -453,22 +459,22 @@ void Node::setToNextLegalChildIndex(char *pChildIndex)
         char mazeSquare = this->maze[robotLocation];
 
         // TODO : add default child (child index 0)
-        if (*pChildIndex <= 0 && (mazeSquare & constants::UP_MASK))
+        if (*pChildIndex <= 0 && (mazeSquare & UP_MASK))
         {
             *pChildIndex = 1;
         }
 
-        else if (*pChildIndex <= 1 && (mazeSquare & constants::DOWN_MASK))
+        else if (*pChildIndex <= 1 && (mazeSquare & DOWN_MASK))
         {
             *pChildIndex = 2;
         }
 
-        else if (*pChildIndex <= 2 && (mazeSquare & constants::LEFT_MASK))
+        else if (*pChildIndex <= 2 && (mazeSquare & LEFT_MASK))
         {
             *pChildIndex = 3;
         }
 
-        else if (*pChildIndex <= 3 && (mazeSquare & constants::RIGHT_MASK))
+        else if (*pChildIndex <= 3 && (mazeSquare & RIGHT_MASK))
         {
             *pChildIndex = 4;
         }
@@ -501,10 +507,10 @@ int Node::getLocationIncrement(char childIndex)
         return 1;
 
     else if (childIndex == 3)
-        return -game::MAZE_WIDTH;
+        return -MAZE_WIDTH;
 
     else if (childIndex == 4)
-        return game::MAZE_WIDTH;
+        return MAZE_WIDTH;
 
     else{
         std::cout << "ERROR : trying to access child that does not exist." << std::endl;
@@ -527,16 +533,16 @@ bool Node::isTerminal()
 }
 
 bool Node::areAllRobotsDead(){
-    return (!this->teams[constants::GORANE_TEAM].isAlive && !this->teams[constants::ENEMY_TEAM].isAlive);
+    return (!this->teams[GORANE_TEAM].isAlive && !this->teams[ENEMY_TEAM].isAlive);
 }
 
 void Node::countCoinsOnGround()
 {
     int count = 0;
 
-    for (int i = 0; i < game::NB_OF_MAZE_SQUARES; i++)
+    for (int i = 0; i < NB_OF_MAZE_SQUARES; i++)
     {
-        if (this->maze[i] & constants::COIN_MASK)
+        if (this->maze[i] & COIN_MASK)
             count++;
     }
 
@@ -546,30 +552,40 @@ void Node::countCoinsOnGround()
 double Node::evaluate()
 {
     // temporary evaluation function
-    // cout << "hello there" << endl;
-    return 0.5 + (double)(this->teams[constants::GORANE_TEAM].coinNb - this->teams[constants::ENEMY_TEAM].coinNb) / (2 * game::NB_OF_COINS);
+    int nbOfCoinsInGame = this->coinsOnGround + this->teams[0].coinNb + this->teams[1].coinNb;
+    return 0.5 + (double)(this->teams[GORANE_TEAM].coinNb - this->teams[ENEMY_TEAM].coinNb) / (2 * (nbOfCoinsInGame));
 }
 
 double Node::getNodeValue()
 {
 
     // if G collected more coins than E, G wins (value is 1)
-    if (this->teams[constants::GORANE_TEAM].coinNb > this->teams[constants::ENEMY_TEAM].coinNb)
-        return constants::MAX_NODE_VALUE;
-    else if (this->teams[constants::GORANE_TEAM].coinNb == this->teams[constants::ENEMY_TEAM].coinNb)
-        return constants::DRAW_NODE_VALUE;
-    // if G collected less coins (or draw), G loses (value is 0)
+    if (this->teams[GORANE_TEAM].coinNb > this->teams[ENEMY_TEAM].coinNb)
+        return MAX_NODE_VALUE;
+    // if G collected as many coins as E, draw (value is 0.5)
+    else if (this->teams[GORANE_TEAM].coinNb == this->teams[ENEMY_TEAM].coinNb)
+        return DRAW_NODE_VALUE;
+    // if G collected less coins G loses (value is 0)
     else
-        return constants::MIN_NODE_VALUE;
+        return MIN_NODE_VALUE;
 }
 
 bool Node::isSquareInTheGas(int location){
     bool isSquareInTheGas = false;
 
-    if (this->maze[location] & constants::GAS_MASK)
+    if (this->maze[location] & GAS_MASK)
         isSquareInTheGas = true;
 
     return isSquareInTheGas;
+}
+
+void Node::killAllRobotExceptOneTakingTurn(){
+    this->teams[!this->teamTakingItsTurn].robots[0].isAlive = false;
+    this->teams[!this->teamTakingItsTurn].robots[1].isAlive = false;
+    this->teams[this->teamTakingItsTurn].robots[!(this->teams[this->teamTakingItsTurn].robotTakingItsTurn)].isAlive = false;
+
+    this->teams[0].updateLives();
+    this->teams[1].updateLives();
 }
 
 void Node::printNode()
@@ -598,8 +614,8 @@ void Node::printNode()
     string coinInGas = "€";
 
     // only works with a squared number of mazes
-    int dim_h = game::MAZE_WIDTH;
-    int dim_v = game::MAZE_WIDTH;
+    int dim_h = MAZE_WIDTH;
+    int dim_v = MAZE_WIDTH;
 
     // first line is line of outer walls
     // draw outer walls at tile intersections only → i+=2
@@ -631,73 +647,73 @@ void Node::printNode()
                     bool currentSquareIdShouldBeBlank = true;
 
                     // print robots
-                    for (int i = 0; i < game::NB_OF_TEAMS; i++)
+                    for (int i = 0; i < NB_OF_TEAMS; i++)
                     {
-                        for (int j = 0; j < game::NB_OF_ROBOTS_PER_TEAM; j++)
+                        for (int j = 0; j < NB_OF_ROBOTS_PER_TEAMS; j++)
                         {
                             if (this->teams[i].robots[j].location == currentSquareId)
                             {
                                 currentSquareIdShouldBeBlank = false;
                                 if (this->teams[i].robots[j].isAlive)
-                                    std::cout << aliveRobots[i * game::NB_OF_TEAMS + j];
+                                    std::cout << aliveRobots[i * NB_OF_TEAMS + j];
                                 else
-                                    std::cout << deadRobots[i * game::NB_OF_TEAMS + j];
+                                    std::cout << deadRobots[i * NB_OF_TEAMS + j];
                             }
                         }
                     }
                     /*
-                    if (game::NB_OF_ROBOTS == 2){
+                    if (NB_OF_ROBOTS == 2){
                         //we print Gorane if it is located in the current square
-                        if (this->robots[constants::GORANE_TEAM].location == currentSquareId){
+                        if (this->robots[GORANE_TEAM].location == currentSquareId){
                             currentSquareIdShouldBeBlank = false;
-                            if(this->robots[constants::GORANE_TEAM].isAlive)
+                            if(this->robots[GORANE_TEAM].isAlive)
                                 std::cout << aliveGoraneRobot;
                             else
                                 std::cout << deadGoraneRobot;
                         }
                         //we print Enemy if it is located in the current square
                         //NOTE : if Enemy & Robot have same location, Gorane will be printed
-                        else if(this->robots[constants::ENEMY_TEAM].location == currentSquareId){
+                        else if(this->robots[ENEMY_TEAM].location == currentSquareId){
                             currentSquareIdShouldBeBlank = false;
-                            if(this->robots[constants::ENEMY_TEAM].isAlive)
+                            if(this->robots[ENEMY_TEAM].isAlive)
                                 std::cout << aliveEnemyRobot;
                             else
                                 std::cout << deadEnemyRobot;
                         }
                     }
 
-                    else if (game::NB_OF_ROBOTS == 4){
+                    else if (NB_OF_ROBOTS == 4){
                         //we print G1 if it is located in the current square
-                        if (this->teams[constants::GORANE_TEAM].robots[constants::GORANE1_INDEX].location == currentSquareId){
+                        if (this->teams[GORANE_TEAM].robots[GORANE1_INDEX].location == currentSquareId){
                             currentSquareIdShouldBeBlank = false;
-                            if(this->robots[constants::GORANE1_INDEX].isAlive)
+                            if(this->robots[GORANE1_INDEX].isAlive)
                                 std::cout << aliveG1;
                             else
                                 std::cout << deadG1;
                         }
 
                         //we print G2 if it is located in the current square
-                        else if (this->teams[constants::GORANE_TEAM].robots[constants::GORANE2_INDEX].location == currentSquareId){
+                        else if (this->teams[GORANE_TEAM].robots[GORANE2_INDEX].location == currentSquareId){
                             currentSquareIdShouldBeBlank = false;
-                            if(this->robots[constants::GORANE2_INDEX].isAlive)
+                            if(this->robots[GORANE2_INDEX].isAlive)
                                 std::cout << aliveG2;
                             else
                                 std::cout << deadG2;
                         }
 
                         //we print E1 if it is located in the current square
-                        else if (this->teams[constants::ENEMY_TEAM].robots[constants::ENEMY1_INDEX].location == currentSquareId){
+                        else if (this->teams[ENEMY_TEAM].robots[ENEMY1_INDEX].location == currentSquareId){
                             currentSquareIdShouldBeBlank = false;
-                            if(this->robots[constants::ENEMY1_INDEX].isAlive)
+                            if(this->robots[ENEMY1_INDEX].isAlive)
                                 std::cout << aliveE1;
                             else
                                 std::cout << deadE1;
                         }
 
                         //we print E2 if it is located in the current square
-                        else if (this->robots[constants::ENEMY2_INDEX].location == currentSquareId){
+                        else if (this->robots[ENEMY2_INDEX].location == currentSquareId){
                             currentSquareIdShouldBeBlank = false;
-                            if(this->robots[constants::ENEMY2_INDEX].isAlive)
+                            if(this->robots[ENEMY2_INDEX].isAlive)
                                 std::cout << aliveE2;
                             else
                                 std::cout << deadE2;
@@ -708,17 +724,17 @@ void Node::printNode()
                     {
 
                         // if no robot is to printed, maybe a coin should be printed
-                        if (this->maze[currentSquareId] & constants::COIN_MASK)
+                        if (this->maze[currentSquareId] & COIN_MASK)
                         {
                             currentSquareIdShouldBeBlank = false;
-                            if (this->maze[currentSquareId] & constants::GAS_MASK)
+                            if (this->maze[currentSquareId] & GAS_MASK)
                                 std::cout << coinInGas;
                             else
                                 std::cout << coin;
                         }
 
                         // if no robot is to printed, maybe gas should be printed
-                        else if (this->maze[currentSquareId] & constants::GAS_MASK)
+                        else if (this->maze[currentSquareId] & GAS_MASK)
                         {
                             currentSquareIdShouldBeBlank = false;
                             std::cout << gaz;
@@ -736,7 +752,7 @@ void Node::printNode()
                     int leftSquareId = (i - 1) / 2 + (j - 2) / 2 * dim_v;
                     int rightSquareId = (i - 1) / 2 + j / 2 * dim_v;
 
-                    if (this->maze[leftSquareId] & constants::RIGHT_MASK)
+                    if (this->maze[leftSquareId] & RIGHT_MASK)
                         std::cout << blank;
                     // otherwise print wall
                     else
@@ -752,7 +768,7 @@ void Node::printNode()
                     int upperSquareId = (i - 2) / 2 + (j - 1) / 2 * dim_v;
                     int lowerSquareId = i / 2 + (j - 1) / 2 * dim_v;
 
-                    if (this->maze[upperSquareId] & constants::DOWN_MASK)
+                    if (this->maze[upperSquareId] & DOWN_MASK)
                         std::cout << blank;
                     // otherwise print wall
                     else

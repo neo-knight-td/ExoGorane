@@ -1,7 +1,7 @@
-#include "Constants.h"
-
 #ifndef FOUR_ROBOTS_LARGE_MAZE_H
 #define FOUR_ROBOTS_LARGE_MAZE_H
+
+#include "Constants.h"
 
 namespace game
 {
@@ -16,215 +16,215 @@ namespace game
     inline const char MAZE[NB_OF_MAZE_SQUARES] =
         {
             // column 1
-            {constants::DOWN_MASK + constants::RIGHT_MASK},//1
-            {constants::UP_MASK + constants::DOWN_MASK},//2
-            {constants::UP_MASK + constants::DOWN_MASK},//3
-            {constants::UP_MASK + constants::RIGHT_MASK},//4
-            {constants::DOWN_MASK + constants::RIGHT_MASK},//5
-            {constants::UP_MASK + constants::RIGHT_MASK},//6
-            {constants::DOWN_MASK + constants::RIGHT_MASK},//7
-            {constants::UP_MASK + constants::RIGHT_MASK},//8
-            {constants::DOWN_MASK + constants::RIGHT_MASK},//9
-            {constants::UP_MASK + constants::RIGHT_MASK},//10
-            {constants::DOWN_MASK + constants::RIGHT_MASK},//11
-            {constants::UP_MASK + constants::DOWN_MASK},//12
-            {constants::UP_MASK + constants::DOWN_MASK},//13
-            {constants::UP_MASK + constants::RIGHT_MASK},//14
+            {DOWN_MASK + RIGHT_MASK},//1
+            {UP_MASK + DOWN_MASK},//2
+            {UP_MASK + DOWN_MASK},//3
+            {UP_MASK + RIGHT_MASK},//4
+            {DOWN_MASK + RIGHT_MASK},//5
+            {UP_MASK + RIGHT_MASK},//6
+            {DOWN_MASK + RIGHT_MASK},//7
+            {UP_MASK + RIGHT_MASK},//8
+            {DOWN_MASK + RIGHT_MASK},//9
+            {UP_MASK + RIGHT_MASK},//10
+            {DOWN_MASK + RIGHT_MASK},//11
+            {UP_MASK + DOWN_MASK},//12
+            {UP_MASK + DOWN_MASK},//13
+            {UP_MASK + RIGHT_MASK},//14
             // column 2
-            {constants::DOWN_MASK + constants::LEFT_MASK + constants::RIGHT_MASK},//1
-            {constants::UP_MASK + constants::RIGHT_MASK},//2
-            {constants::DOWN_MASK + constants::RIGHT_MASK},//3
-            {constants::UP_MASK + constants::DOWN_MASK + constants::LEFT_MASK},//4
-            {constants::UP_MASK + constants::LEFT_MASK},//5
-            {constants::LEFT_MASK + constants::RIGHT_MASK},//6
-            {constants::LEFT_MASK + constants::RIGHT_MASK},//7
-            {constants::LEFT_MASK + constants::RIGHT_MASK},//8
-            {constants::LEFT_MASK + constants::RIGHT_MASK},//9
-            {constants::DOWN_MASK + constants::LEFT_MASK},//10
-            {constants::UP_MASK + constants::DOWN_MASK + constants::LEFT_MASK},//11
-            {constants::UP_MASK + constants::RIGHT_MASK},//12
-            {constants::DOWN_MASK + constants::RIGHT_MASK},//13
-            {constants::UP_MASK + constants::LEFT_MASK + constants::RIGHT_MASK},//14
+            {DOWN_MASK + LEFT_MASK + RIGHT_MASK},//1
+            {UP_MASK + RIGHT_MASK},//2
+            {DOWN_MASK + RIGHT_MASK},//3
+            {UP_MASK + DOWN_MASK + LEFT_MASK},//4
+            {UP_MASK + LEFT_MASK},//5
+            {LEFT_MASK + RIGHT_MASK},//6
+            {LEFT_MASK + RIGHT_MASK},//7
+            {LEFT_MASK + RIGHT_MASK},//8
+            {LEFT_MASK + RIGHT_MASK},//9
+            {DOWN_MASK + LEFT_MASK},//10
+            {UP_MASK + DOWN_MASK + LEFT_MASK},//11
+            {UP_MASK + RIGHT_MASK},//12
+            {DOWN_MASK + RIGHT_MASK},//13
+            {UP_MASK + LEFT_MASK + RIGHT_MASK},//14
             // column 3
-            {constants::LEFT_MASK + constants::RIGHT_MASK},//1
-            {constants::LEFT_MASK + constants::RIGHT_MASK},//2
-            {constants::DOWN_MASK + constants::LEFT_MASK},//3
-            {constants::UP_MASK + constants::RIGHT_MASK},//4
-            {constants::DOWN_MASK + constants::RIGHT_MASK},//5
-            {constants::UP_MASK + constants::LEFT_MASK},//6
-            {constants::LEFT_MASK + constants::RIGHT_MASK},//7
-            {constants::LEFT_MASK + constants::RIGHT_MASK},//8
-            {constants::DOWN_MASK + constants::LEFT_MASK},//9
-            {constants::UP_MASK + constants::RIGHT_MASK},//10
-            {constants::DOWN_MASK + constants::RIGHT_MASK},//11
-            {constants::UP_MASK + constants::LEFT_MASK},//12
-            {constants::LEFT_MASK + constants::RIGHT_MASK},//13
-            {constants::LEFT_MASK + constants::RIGHT_MASK},//14
+            {LEFT_MASK + RIGHT_MASK},//1
+            {LEFT_MASK + RIGHT_MASK},//2
+            {DOWN_MASK + LEFT_MASK},//3
+            {UP_MASK + RIGHT_MASK},//4
+            {DOWN_MASK + RIGHT_MASK},//5
+            {UP_MASK + LEFT_MASK},//6
+            {LEFT_MASK + RIGHT_MASK},//7
+            {LEFT_MASK + RIGHT_MASK},//8
+            {DOWN_MASK + LEFT_MASK},//9
+            {UP_MASK + RIGHT_MASK},//10
+            {DOWN_MASK + RIGHT_MASK},//11
+            {UP_MASK + LEFT_MASK},//12
+            {LEFT_MASK + RIGHT_MASK},//13
+            {LEFT_MASK + RIGHT_MASK},//14
             // column 4
-            {constants::LEFT_MASK + constants::RIGHT_MASK},//1
-            {constants::DOWN_MASK + constants::LEFT_MASK},//2
-            {constants::UP_MASK + constants::DOWN_MASK},//3
-            {constants::UP_MASK + constants::LEFT_MASK},//4
-            {constants::LEFT_MASK + constants::RIGHT_MASK},//5
-            {constants::DOWN_MASK + constants::RIGHT_MASK},//6
-            {constants::UP_MASK + constants::DOWN_MASK + constants::LEFT_MASK},//7
-            {constants::UP_MASK + constants::DOWN_MASK + constants::LEFT_MASK},//8
-            {constants::UP_MASK + constants::RIGHT_MASK},//9
-            {constants::LEFT_MASK + constants::RIGHT_MASK},//10
-            {constants::DOWN_MASK + constants::LEFT_MASK},//11
-            {constants::UP_MASK + constants::DOWN_MASK},//12
-            {constants::LEFT_MASK + constants::UP_MASK},//13
-            {constants::LEFT_MASK + constants::RIGHT_MASK},//14
+            {LEFT_MASK + RIGHT_MASK},//1
+            {DOWN_MASK + LEFT_MASK},//2
+            {UP_MASK + DOWN_MASK},//3
+            {UP_MASK + LEFT_MASK},//4
+            {LEFT_MASK + RIGHT_MASK},//5
+            {DOWN_MASK + RIGHT_MASK},//6
+            {UP_MASK + DOWN_MASK + LEFT_MASK},//7
+            {UP_MASK + DOWN_MASK + LEFT_MASK},//8
+            {UP_MASK + RIGHT_MASK},//9
+            {LEFT_MASK + RIGHT_MASK},//10
+            {DOWN_MASK + LEFT_MASK},//11
+            {UP_MASK + DOWN_MASK},//12
+            {LEFT_MASK + UP_MASK},//13
+            {LEFT_MASK + RIGHT_MASK},//14
             // column 5
-            {constants::DOWN_MASK + constants::LEFT_MASK},//1
-            {constants::UP_MASK + constants::RIGHT_MASK},//2
-            {constants::DOWN_MASK + constants::RIGHT_MASK},//3
-            {constants::UP_MASK + constants::DOWN_MASK},//4
-            {constants::UP_MASK + constants::DOWN_MASK + constants::LEFT_MASK + constants::RIGHT_MASK},//5
-            {constants::UP_MASK + constants::LEFT_MASK},//6
-            {constants::DOWN_MASK + constants::RIGHT_MASK},//7
-            {constants::UP_MASK + constants::RIGHT_MASK},//8
-            {constants::DOWN_MASK + constants::LEFT_MASK},//9
-            {constants::UP_MASK + constants::DOWN_MASK + constants::LEFT_MASK + constants::RIGHT_MASK},//10
-            {constants::UP_MASK + constants::DOWN_MASK},//11
-            {constants::UP_MASK + constants::RIGHT_MASK},//12
-            {constants::DOWN_MASK + constants::RIGHT_MASK},//13
-            {constants::UP_MASK + constants::LEFT_MASK},//14
+            {DOWN_MASK + LEFT_MASK},//1
+            {UP_MASK + RIGHT_MASK},//2
+            {DOWN_MASK + RIGHT_MASK},//3
+            {UP_MASK + DOWN_MASK},//4
+            {UP_MASK + DOWN_MASK + LEFT_MASK + RIGHT_MASK},//5
+            {UP_MASK + LEFT_MASK},//6
+            {DOWN_MASK + RIGHT_MASK},//7
+            {UP_MASK + RIGHT_MASK},//8
+            {DOWN_MASK + LEFT_MASK},//9
+            {UP_MASK + DOWN_MASK + LEFT_MASK + RIGHT_MASK},//10
+            {UP_MASK + DOWN_MASK},//11
+            {UP_MASK + RIGHT_MASK},//12
+            {DOWN_MASK + RIGHT_MASK},//13
+            {UP_MASK + LEFT_MASK},//14
             // column 6
-            {constants::DOWN_MASK + constants::RIGHT_MASK},//1
-            {constants::UP_MASK + constants::LEFT_MASK},//2
-            {constants::DOWN_MASK + constants::LEFT_MASK + constants::RIGHT_MASK},//3
-            {constants::UP_MASK},//4
-            {constants::DOWN_MASK + constants::LEFT_MASK},//5
-            {constants::UP_MASK + constants::DOWN_MASK + constants::RIGHT_MASK},//6
-            {constants::UP_MASK + constants::LEFT_MASK},//7
-            {constants::DOWN_MASK + constants::LEFT_MASK + constants::RIGHT_MASK},//8
-            {constants::UP_MASK + constants::DOWN_MASK + constants::RIGHT_MASK},//9
-            {constants::UP_MASK + constants::LEFT_MASK},//10
-            {constants::DOWN_MASK},//11
-            {constants::UP_MASK + constants::LEFT_MASK + constants::RIGHT_MASK},//12
-            {constants::DOWN_MASK + constants::LEFT_MASK},//13
-            {constants::UP_MASK + constants::RIGHT_MASK},//14
+            {DOWN_MASK + RIGHT_MASK},//1
+            {UP_MASK + LEFT_MASK},//2
+            {DOWN_MASK + LEFT_MASK + RIGHT_MASK},//3
+            {UP_MASK},//4
+            {DOWN_MASK + LEFT_MASK},//5
+            {UP_MASK + DOWN_MASK + RIGHT_MASK},//6
+            {UP_MASK + LEFT_MASK},//7
+            {DOWN_MASK + LEFT_MASK + RIGHT_MASK},//8
+            {UP_MASK + DOWN_MASK + RIGHT_MASK},//9
+            {UP_MASK + LEFT_MASK},//10
+            {DOWN_MASK},//11
+            {UP_MASK + LEFT_MASK + RIGHT_MASK},//12
+            {DOWN_MASK + LEFT_MASK},//13
+            {UP_MASK + RIGHT_MASK},//14
             // column 7
-            {constants::DOWN_MASK + constants::LEFT_MASK + constants::RIGHT_MASK},//1
-            {constants::UP_MASK + constants::DOWN_MASK + constants::RIGHT_MASK},//2
-            {constants::UP_MASK + constants::LEFT_MASK},//3
-            {constants::DOWN_MASK + constants::RIGHT_MASK},//4
-            {constants::UP_MASK + constants::DOWN_MASK},//5
-            {constants::UP_MASK + constants::DOWN_MASK + constants::LEFT_MASK},//6
-            {constants::UP_MASK + constants::DOWN_MASK + constants::RIGHT_MASK},//7
-            {constants::UP_MASK + constants::LEFT_MASK + constants::RIGHT_MASK},//8
-            {constants::DOWN_MASK + constants::LEFT_MASK},//9
-            {constants::UP_MASK + constants::DOWN_MASK},//10
-            {constants::UP_MASK + constants::RIGHT_MASK},//11
-            {constants::DOWN_MASK + constants::LEFT_MASK},//12
-            {constants::UP_MASK + constants::DOWN_MASK + constants::RIGHT_MASK},//13
-            {constants::UP_MASK + constants::LEFT_MASK + constants::RIGHT_MASK},//14
+            {DOWN_MASK + LEFT_MASK + RIGHT_MASK},//1
+            {UP_MASK + DOWN_MASK + RIGHT_MASK},//2
+            {UP_MASK + LEFT_MASK},//3
+            {DOWN_MASK + RIGHT_MASK},//4
+            {UP_MASK + DOWN_MASK},//5
+            {UP_MASK + DOWN_MASK + LEFT_MASK},//6
+            {UP_MASK + DOWN_MASK + RIGHT_MASK},//7
+            {UP_MASK + LEFT_MASK + RIGHT_MASK},//8
+            {DOWN_MASK + LEFT_MASK},//9
+            {UP_MASK + DOWN_MASK},//10
+            {UP_MASK + RIGHT_MASK},//11
+            {DOWN_MASK + LEFT_MASK},//12
+            {UP_MASK + DOWN_MASK + RIGHT_MASK},//13
+            {UP_MASK + LEFT_MASK + RIGHT_MASK},//14
             // column 8
-            {constants::DOWN_MASK + constants::RIGHT_MASK + constants::LEFT_MASK},//1
-            {constants::UP_MASK + constants::DOWN_MASK + constants::LEFT_MASK},//2
-            {constants::UP_MASK + constants::RIGHT_MASK},//3
-            {constants::DOWN_MASK + constants::LEFT_MASK},//4
-            {constants::UP_MASK + constants::DOWN_MASK},//5
-            {constants::UP_MASK + constants::RIGHT_MASK},//6
-            {constants::RIGHT_MASK + constants::DOWN_MASK + constants::LEFT_MASK},//7
-            {constants::UP_MASK + constants::DOWN_MASK + constants::LEFT_MASK},//8
-            {constants::UP_MASK + constants::DOWN_MASK + constants::RIGHT_MASK},//9
-            {constants::UP_MASK + constants::DOWN_MASK},//10
-            {constants::UP_MASK + constants::LEFT_MASK},//11
-            {constants::DOWN_MASK + constants::RIGHT_MASK},//12
-            {constants::UP_MASK + constants::DOWN_MASK + constants::LEFT_MASK},//13
-            {constants::UP_MASK + constants::RIGHT_MASK + constants::LEFT_MASK},//14
+            {DOWN_MASK + RIGHT_MASK + LEFT_MASK},//1
+            {UP_MASK + DOWN_MASK + LEFT_MASK},//2
+            {UP_MASK + RIGHT_MASK},//3
+            {DOWN_MASK + LEFT_MASK},//4
+            {UP_MASK + DOWN_MASK},//5
+            {UP_MASK + RIGHT_MASK},//6
+            {RIGHT_MASK + DOWN_MASK + LEFT_MASK},//7
+            {UP_MASK + DOWN_MASK + LEFT_MASK},//8
+            {UP_MASK + DOWN_MASK + RIGHT_MASK},//9
+            {UP_MASK + DOWN_MASK},//10
+            {UP_MASK + LEFT_MASK},//11
+            {DOWN_MASK + RIGHT_MASK},//12
+            {UP_MASK + DOWN_MASK + LEFT_MASK},//13
+            {UP_MASK + RIGHT_MASK + LEFT_MASK},//14
             // column 9
-            {constants::DOWN_MASK + constants::LEFT_MASK},//1
-            {constants::UP_MASK + constants::RIGHT_MASK},//2
-            {constants::DOWN_MASK + constants::RIGHT_MASK + constants::LEFT_MASK},//3
-            {constants::UP_MASK},//4
-            {constants::DOWN_MASK + constants::RIGHT_MASK},//5
-            {constants::UP_MASK + constants::DOWN_MASK + constants::LEFT_MASK},//6
-            {constants::UP_MASK + constants::RIGHT_MASK + constants::LEFT_MASK},//7
-            {constants::DOWN_MASK + constants::RIGHT_MASK},//8
-            {constants::UP_MASK + constants::DOWN_MASK + constants::LEFT_MASK},//9
-            {constants::UP_MASK + constants::RIGHT_MASK},//10
-            {constants::DOWN_MASK},//11
-            {constants::UP_MASK + constants::RIGHT_MASK + constants::LEFT_MASK},//12
-            {constants::DOWN_MASK + constants::RIGHT_MASK},//13
-            {constants::UP_MASK + constants::LEFT_MASK},//14
+            {DOWN_MASK + LEFT_MASK},//1
+            {UP_MASK + RIGHT_MASK},//2
+            {DOWN_MASK + RIGHT_MASK + LEFT_MASK},//3
+            {UP_MASK},//4
+            {DOWN_MASK + RIGHT_MASK},//5
+            {UP_MASK + DOWN_MASK + LEFT_MASK},//6
+            {UP_MASK + RIGHT_MASK + LEFT_MASK},//7
+            {DOWN_MASK + RIGHT_MASK},//8
+            {UP_MASK + DOWN_MASK + LEFT_MASK},//9
+            {UP_MASK + RIGHT_MASK},//10
+            {DOWN_MASK},//11
+            {UP_MASK + RIGHT_MASK + LEFT_MASK},//12
+            {DOWN_MASK + RIGHT_MASK},//13
+            {UP_MASK + LEFT_MASK},//14
             // column 10
-            {constants::DOWN_MASK + constants::RIGHT_MASK},//1
-            {constants::UP_MASK + constants::LEFT_MASK},//2
-            {constants::DOWN_MASK + constants::LEFT_MASK},//3
-            {constants::UP_MASK + constants::DOWN_MASK},//4
-            {constants::UP_MASK + constants::DOWN_MASK + constants::RIGHT_MASK + constants::LEFT_MASK},//5
-            {constants::UP_MASK + constants::RIGHT_MASK},//6
-            {constants::DOWN_MASK + constants::LEFT_MASK},//7
-            {constants::UP_MASK + constants::LEFT_MASK},//8
-            {constants::DOWN_MASK + constants::RIGHT_MASK},//9
-            {constants::UP_MASK + constants::DOWN_MASK + constants::RIGHT_MASK + constants::LEFT_MASK},//10
-            {constants::UP_MASK + constants::DOWN_MASK},//11
-            {constants::UP_MASK + constants::LEFT_MASK},//12
-            {constants::DOWN_MASK + constants::LEFT_MASK},//13
-            {constants::UP_MASK + constants::RIGHT_MASK},//14
+            {DOWN_MASK + RIGHT_MASK},//1
+            {UP_MASK + LEFT_MASK},//2
+            {DOWN_MASK + LEFT_MASK},//3
+            {UP_MASK + DOWN_MASK},//4
+            {UP_MASK + DOWN_MASK + RIGHT_MASK + LEFT_MASK},//5
+            {UP_MASK + RIGHT_MASK},//6
+            {DOWN_MASK + LEFT_MASK},//7
+            {UP_MASK + LEFT_MASK},//8
+            {DOWN_MASK + RIGHT_MASK},//9
+            {UP_MASK + DOWN_MASK + RIGHT_MASK + LEFT_MASK},//10
+            {UP_MASK + DOWN_MASK},//11
+            {UP_MASK + LEFT_MASK},//12
+            {DOWN_MASK + LEFT_MASK},//13
+            {UP_MASK + RIGHT_MASK},//14
             // column 11
-            {constants::RIGHT_MASK + constants::LEFT_MASK},//1
-            {constants::DOWN_MASK + constants::RIGHT_MASK},//2
-            {constants::UP_MASK + constants::DOWN_MASK},//3
-            {constants::UP_MASK + constants::RIGHT_MASK},//4
-            {constants::RIGHT_MASK + constants::LEFT_MASK},//5
-            {constants::DOWN_MASK + constants::LEFT_MASK},//6
-            {constants::UP_MASK + constants::DOWN_MASK + constants::RIGHT_MASK},//7
-            {constants::UP_MASK + constants::DOWN_MASK + constants::RIGHT_MASK},//8
-            {constants::UP_MASK + constants::LEFT_MASK},//9
-            {constants::RIGHT_MASK + constants::LEFT_MASK},//10
-            {constants::DOWN_MASK + constants::RIGHT_MASK},//11
-            {constants::UP_MASK + constants::DOWN_MASK},//12
-            {constants::RIGHT_MASK + constants::UP_MASK},//13
-            {constants::RIGHT_MASK + constants::LEFT_MASK},//14
+            {RIGHT_MASK + LEFT_MASK},//1
+            {DOWN_MASK + RIGHT_MASK},//2
+            {UP_MASK + DOWN_MASK},//3
+            {UP_MASK + RIGHT_MASK},//4
+            {RIGHT_MASK + LEFT_MASK},//5
+            {DOWN_MASK + LEFT_MASK},//6
+            {UP_MASK + DOWN_MASK + RIGHT_MASK},//7
+            {UP_MASK + DOWN_MASK + RIGHT_MASK},//8
+            {UP_MASK + LEFT_MASK},//9
+            {RIGHT_MASK + LEFT_MASK},//10
+            {DOWN_MASK + RIGHT_MASK},//11
+            {UP_MASK + DOWN_MASK},//12
+            {RIGHT_MASK + UP_MASK},//13
+            {RIGHT_MASK + LEFT_MASK},//14
             // column 12
-            {constants::RIGHT_MASK + constants::LEFT_MASK},//1
-            {constants::RIGHT_MASK + constants::LEFT_MASK},//2
-            {constants::DOWN_MASK + constants::RIGHT_MASK},//3
-            {constants::UP_MASK + constants::LEFT_MASK},//4
-            {constants::DOWN_MASK + constants::LEFT_MASK},//5
-            {constants::UP_MASK + constants::RIGHT_MASK},//6
-            {constants::RIGHT_MASK + constants::LEFT_MASK},//7
-            {constants::RIGHT_MASK + constants::LEFT_MASK},//8
-            {constants::DOWN_MASK + constants::RIGHT_MASK},//9
-            {constants::UP_MASK + constants::LEFT_MASK},//10
-            {constants::DOWN_MASK + constants::LEFT_MASK},//11
-            {constants::UP_MASK + constants::RIGHT_MASK},//12
-            {constants::RIGHT_MASK + constants::LEFT_MASK},//13
-            {constants::RIGHT_MASK + constants::LEFT_MASK},//14
+            {RIGHT_MASK + LEFT_MASK},//1
+            {RIGHT_MASK + LEFT_MASK},//2
+            {DOWN_MASK + RIGHT_MASK},//3
+            {UP_MASK + LEFT_MASK},//4
+            {DOWN_MASK + LEFT_MASK},//5
+            {UP_MASK + RIGHT_MASK},//6
+            {RIGHT_MASK + LEFT_MASK},//7
+            {RIGHT_MASK + LEFT_MASK},//8
+            {DOWN_MASK + RIGHT_MASK},//9
+            {UP_MASK + LEFT_MASK},//10
+            {DOWN_MASK + LEFT_MASK},//11
+            {UP_MASK + RIGHT_MASK},//12
+            {RIGHT_MASK + LEFT_MASK},//13
+            {RIGHT_MASK + LEFT_MASK},//14
             // column 13
-            {constants::DOWN_MASK + constants::RIGHT_MASK + constants::LEFT_MASK},//1
-            {constants::UP_MASK + constants::LEFT_MASK},//2
-            {constants::DOWN_MASK + constants::LEFT_MASK},//3
-            {constants::UP_MASK + constants::DOWN_MASK + constants::RIGHT_MASK},//4
-            {constants::UP_MASK + constants::RIGHT_MASK},//5
-            {constants::RIGHT_MASK + constants::LEFT_MASK},//6
-            {constants::RIGHT_MASK + constants::LEFT_MASK},//7
-            {constants::RIGHT_MASK + constants::LEFT_MASK},//8
-            {constants::RIGHT_MASK + constants::LEFT_MASK},//9
-            {constants::DOWN_MASK + constants::RIGHT_MASK},//10
-            {constants::UP_MASK + constants::DOWN_MASK + constants::RIGHT_MASK},//11
-            {constants::UP_MASK + constants::LEFT_MASK},//12
-            {constants::DOWN_MASK + constants::LEFT_MASK},//13
-            {constants::UP_MASK + constants::RIGHT_MASK + constants::LEFT_MASK},//14
+            {DOWN_MASK + RIGHT_MASK + LEFT_MASK},//1
+            {UP_MASK + LEFT_MASK},//2
+            {DOWN_MASK + LEFT_MASK},//3
+            {UP_MASK + DOWN_MASK + RIGHT_MASK},//4
+            {UP_MASK + RIGHT_MASK},//5
+            {RIGHT_MASK + LEFT_MASK},//6
+            {RIGHT_MASK + LEFT_MASK},//7
+            {RIGHT_MASK + LEFT_MASK},//8
+            {RIGHT_MASK + LEFT_MASK},//9
+            {DOWN_MASK + RIGHT_MASK},//10
+            {UP_MASK + DOWN_MASK + RIGHT_MASK},//11
+            {UP_MASK + LEFT_MASK},//12
+            {DOWN_MASK + LEFT_MASK},//13
+            {UP_MASK + RIGHT_MASK + LEFT_MASK},//14
             // column 14
-            {constants::DOWN_MASK + constants::LEFT_MASK},//1
-            {constants::UP_MASK + constants::DOWN_MASK},//2
-            {constants::UP_MASK + constants::DOWN_MASK},//3
-            {constants::UP_MASK + constants::LEFT_MASK},//4
-            {constants::DOWN_MASK + constants::LEFT_MASK},//5
-            {constants::UP_MASK + constants::LEFT_MASK},//6
-            {constants::DOWN_MASK + constants::LEFT_MASK},//7
-            {constants::UP_MASK + constants::LEFT_MASK},//8
-            {constants::DOWN_MASK + constants::LEFT_MASK},//9
-            {constants::UP_MASK + constants::LEFT_MASK},//10
-            {constants::DOWN_MASK + constants::LEFT_MASK},//11
-            {constants::UP_MASK + constants::DOWN_MASK},//12
-            {constants::UP_MASK + constants::DOWN_MASK},//13
-            {constants::UP_MASK + constants::LEFT_MASK}//14
+            {DOWN_MASK + LEFT_MASK},//1
+            {UP_MASK + DOWN_MASK},//2
+            {UP_MASK + DOWN_MASK},//3
+            {UP_MASK + LEFT_MASK},//4
+            {DOWN_MASK + LEFT_MASK},//5
+            {UP_MASK + LEFT_MASK},//6
+            {DOWN_MASK + LEFT_MASK},//7
+            {UP_MASK + LEFT_MASK},//8
+            {DOWN_MASK + LEFT_MASK},//9
+            {UP_MASK + LEFT_MASK},//10
+            {DOWN_MASK + LEFT_MASK},//11
+            {UP_MASK + DOWN_MASK},//12
+            {UP_MASK + DOWN_MASK},//13
+            {UP_MASK + LEFT_MASK}//14
     };
     inline const int NB_OF_TEAMS = 2;
     // define the number of robots in the game

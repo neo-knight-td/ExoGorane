@@ -153,7 +153,7 @@ void AStarNode::generateChild(char childIndex){
 
 //checks if node is a leaf node
 bool AStarNode::isLeafNode(){
-    for (int i=0; i < game::BRANCHING_FACTOR; i++){
+    for (int i=0; i < BRANCHING_FACTOR; i++){
         if (this->pChildNodes[i] != nullptr)
             return false;
     }
@@ -179,6 +179,7 @@ int AStarNode::getResidualCost(){
     //if the currently selected node does not allow to reach center of maze (gas traps him before), add cost of 1000 ==> the node
     //should never be chosen !
     //TODO : OPTI is highly time consuming. Try to launch it only if certain conditions are met (TimeUntilGasClosure below certain threshold ?)
+    //try to reach a coin on ring of coin (at certain distance from the center (faster))
     if (!isPossibleToReachMazeCenter()){
         residualCost += 1000;
         return residualCost;
@@ -256,13 +257,13 @@ int AStarNode::getDistanceToClosestCoin(){
 
     int minDist = 1000;
     //loop on all square
-    for (int i =0; i < game::NB_OF_MAZE_SQUARES; i++){
+    for (int i =0; i < NB_OF_MAZE_SQUARES; i++){
         char mazeSquare = this->maze[i];
         //if we find a coin on the ground
-        if (mazeSquare & constants::COIN_MASK){
+        if (mazeSquare & COIN_MASK){
             
             //compute manhattan distance to coin
-            int dist = abs(robotLocation%game::MAZE_WIDTH - i%game::MAZE_WIDTH) + abs(robotLocation/game::MAZE_WIDTH - i/game::MAZE_WIDTH);
+            int dist = abs(robotLocation%MAZE_WIDTH - i%MAZE_WIDTH) + abs(robotLocation/MAZE_WIDTH - i/MAZE_WIDTH);
 
             //NOTE : debug purpose only
             //if (dist == 0)
@@ -282,10 +283,10 @@ int AStarNode::getDistanceToBorder(){
     bool robotTakingItsTurn = this->teams[this->teamTakingItsTurn].robotTakingItsTurn;
     int robotLocation = this->teams[this->teamTakingItsTurn].robots[robotTakingItsTurn].location;
 
-    int distToBorders[4] = {robotLocation%game::MAZE_WIDTH + 1,
-    game::MAZE_WIDTH - robotLocation%game::MAZE_WIDTH,
-    robotLocation/game::MAZE_WIDTH + 1,
-    game::MAZE_WIDTH - robotLocation/game::MAZE_WIDTH
+    int distToBorders[4] = {robotLocation%MAZE_WIDTH + 1,
+    MAZE_WIDTH - robotLocation%MAZE_WIDTH,
+    robotLocation/MAZE_WIDTH + 1,
+    MAZE_WIDTH - robotLocation/MAZE_WIDTH
     };
 
     return *min_element(distToBorders, distToBorders + 4);
@@ -295,24 +296,24 @@ int AStarNode::getDistanceToBorder(){
 //will modify the maze of the node to have only one coin in the center
 void AStarNode::modifyToMazeWithOneCoin(){
     //erase all coins in the game
-    for (int i = 0; i < game::NB_OF_MAZE_SQUARES; i ++){
-        if (this->maze[i] & constants::COIN_MASK){
-            this->maze[i] += - constants::COIN_MASK;
+    for (int i = 0; i < NB_OF_MAZE_SQUARES; i ++){
+        if (this->maze[i] & COIN_MASK){
+            this->maze[i] += - COIN_MASK;
         }
     }
 
     //add one coin the center of the maze
-    this->maze[game::NB_OF_MAZE_SQUARES/2 - game::MAZE_WIDTH/2] += constants::COIN_MASK;
+    this->maze[NB_OF_MAZE_SQUARES/2 - MAZE_WIDTH/2] += COIN_MASK;
 }
 
 bool AStarNode::isPossibleToReachMazeCenter(){
     //check if robot is not already at the maze center
     bool robotTakingItsTurn = this->teams[this->teamTakingItsTurn].robotTakingItsTurn;
     int robotLocation = this->teams[this->teamTakingItsTurn].robots[robotTakingItsTurn].location;
-    if(robotLocation == game::NB_OF_MAZE_SQUARES/2 - game::MAZE_WIDTH/2 ||
-    robotLocation == game::NB_OF_MAZE_SQUARES/2 - game::MAZE_WIDTH/2 -1 ||
-    robotLocation == game::NB_OF_MAZE_SQUARES/2 - game::MAZE_WIDTH/2 + game::MAZE_WIDTH ||
-    robotLocation == game::NB_OF_MAZE_SQUARES/2 - game::MAZE_WIDTH/2 + game::MAZE_WIDTH -1 )
+    if(robotLocation == NB_OF_MAZE_SQUARES/2 - MAZE_WIDTH/2 ||
+    robotLocation == NB_OF_MAZE_SQUARES/2 - MAZE_WIDTH/2 -1 ||
+    robotLocation == NB_OF_MAZE_SQUARES/2 - MAZE_WIDTH/2 + MAZE_WIDTH ||
+    robotLocation == NB_OF_MAZE_SQUARES/2 - MAZE_WIDTH/2 + MAZE_WIDTH -1 )
         //if we already are at the center of the maze, return true
         return true;
     
@@ -352,18 +353,18 @@ void AStarNode::setClusterIdInNeighbours(int coinClusters[], int i, int clusterI
     //set neighbours
     int neighbours[4] = {-1000,-1000,-1000,-1000};
     
-    if (i%game::MAZE_WIDTH != 0)
+    if (i%MAZE_WIDTH != 0)
         neighbours[0] = i - 1;
-    if (i%game::MAZE_WIDTH != game::MAZE_WIDTH -1)
+    if (i%MAZE_WIDTH != MAZE_WIDTH -1)
         neighbours[1] = i + 1;
-    if (i/game::MAZE_WIDTH != 0)
-        neighbours[2] = i - game::MAZE_WIDTH;
-    if (i/game::MAZE_WIDTH != game::MAZE_WIDTH -1)
-        neighbours[3] = i + game::MAZE_WIDTH;
+    if (i/MAZE_WIDTH != 0)
+        neighbours[2] = i - MAZE_WIDTH;
+    if (i/MAZE_WIDTH != MAZE_WIDTH -1)
+        neighbours[3] = i + MAZE_WIDTH;
 
     //propagate cluster id in neighbours !
     for (int j=0; j < 4; j++){
-        if (neighbours[j] != -1000 && coinClusters[neighbours[j]] == 0 && this->maze[neighbours[j]] & constants::COIN_MASK)
+        if (neighbours[j] != -1000 && coinClusters[neighbours[j]] == 0 && this->maze[neighbours[j]] & COIN_MASK)
             setClusterIdInNeighbours(coinClusters, neighbours[j], clusterId);
     }
 
@@ -374,22 +375,22 @@ int AStarNode::getDistanceBetweenCoinClusters(int a, int b, int coinClusters[]){
     int minDist = 1000;
 
     //loop over all coins on the ground
-    for (int i =0; i < game::NB_OF_MAZE_SQUARES; i++){
+    for (int i =0; i < NB_OF_MAZE_SQUARES; i++){
         char mazeSquare = this->maze[i];
-        if (mazeSquare & constants::COIN_MASK){
+        if (mazeSquare & COIN_MASK){
 
             //if current coin belongs to cluster a
             if (coinClusters[i] == a){
 
                 //loop over all coins on the ground
-                for (int j =0; j < game::NB_OF_MAZE_SQUARES; j++){
+                for (int j =0; j < NB_OF_MAZE_SQUARES; j++){
                     char mazeSquare = this->maze[j];
-                    if (mazeSquare & constants::COIN_MASK){
+                    if (mazeSquare & COIN_MASK){
 
                         //if current coin belongs to cluster b
                         if (coinClusters[j] == b){
                             //measure the distance
-                            int dist = abs(i%game::MAZE_WIDTH - j%game::MAZE_WIDTH) + abs(i/game::MAZE_WIDTH - j/game::MAZE_WIDTH);
+                            int dist = abs(i%MAZE_WIDTH - j%MAZE_WIDTH) + abs(i/MAZE_WIDTH - j/MAZE_WIDTH);
                             //record distance if smaller than current minimum
                             if (dist < minDist)
                                 minDist = dist;
@@ -405,14 +406,14 @@ int AStarNode::getDistanceBetweenCoinClusters(int a, int b, int coinClusters[]){
 }
 
 int AStarNode::getNumberOfCoinClusters(){
-    int coinClusters[game::NB_OF_MAZE_SQUARES] = {0};
+    int coinClusters[NB_OF_MAZE_SQUARES] = {0};
     int nbOfClusters = 0;
 
     //build coin clusters :
     //loop over all coins on the ground
-    for (int i =0; i < game::NB_OF_MAZE_SQUARES; i++){
+    for (int i =0; i < NB_OF_MAZE_SQUARES; i++){
         char mazeSquare = this->maze[i];
-        if (mazeSquare & constants::COIN_MASK){
+        if (mazeSquare & COIN_MASK){
 
             //if current coin has no cluster yet
             if (coinClusters[i] == 0){
@@ -428,14 +429,14 @@ int AStarNode::getNumberOfCoinClusters(){
 }
 
 int AStarNode::getDistanceBetweenAllCoinClusters(){
-    int coinClusters[game::NB_OF_MAZE_SQUARES] = {0};
+    int coinClusters[NB_OF_MAZE_SQUARES] = {0};
     int nbOfClusters = 0;
 
     //build coin clusters :
     //loop over all coins on the ground
-    for (int i =0; i < game::NB_OF_MAZE_SQUARES; i++){
+    for (int i =0; i < NB_OF_MAZE_SQUARES; i++){
         char mazeSquare = this->maze[i];
-        if (mazeSquare & constants::COIN_MASK){
+        if (mazeSquare & COIN_MASK){
 
             //if current coin has no cluster yet
             if (coinClusters[i] == 0){

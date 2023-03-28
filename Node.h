@@ -15,14 +15,14 @@ struct Robot{
 class Team{
     public :
         //create a team with 2 robots
-        Robot robots[game::NB_OF_ROBOTS_PER_TEAM];
+        Robot robots[NB_OF_ROBOTS_PER_TEAMS];
         int coinNb = 0;
         bool isAlive = false;
         bool robotTakingItsTurn = false;
 
     public :
     Team(Robot *paramRobots){
-        for(int i=0; i < game::NB_OF_ROBOTS_PER_TEAM; i++){
+        for(int i=0; i < NB_OF_ROBOTS_PER_TEAMS; i++){
             this->robots[i] = paramRobots[i];
         }
         updateCoins();
@@ -30,7 +30,7 @@ class Team{
     }
     
     Team(){
-        for(int i=0; i < game::NB_OF_ROBOTS_PER_TEAM; i++){ 
+        for(int i=0; i < NB_OF_ROBOTS_PER_TEAMS; i++){ 
             struct Robot defaultRobot = {0, 0, true};
             this->robots[i] = defaultRobot;
         }
@@ -38,7 +38,7 @@ class Team{
 
     void updateCoins(){
         int count = 0;
-        for(int i = 0; i < game::NB_OF_ROBOTS_PER_TEAM; i++){
+        for(int i = 0; i < NB_OF_ROBOTS_PER_TEAMS; i++){
             count += this->robots[i].coinNb;
         }
         this->coinNb = count;
@@ -46,7 +46,7 @@ class Team{
 
     void updateLives(){
         bool allRobotsDead = true;
-        for(int i = 0; i < game::NB_OF_ROBOTS_PER_TEAM; i++){
+        for(int i = 0; i < NB_OF_ROBOTS_PER_TEAMS; i++){
             if (this->robots[i].isAlive)
                 allRobotsDead = false;
         }
@@ -56,11 +56,11 @@ class Team{
 
 class Node
 {   public :
-
-        char maze[game::NB_OF_MAZE_SQUARES];
-        Team teams[game::NB_OF_TEAMS];
+        char maze[NB_OF_MAZE_SQUARES];
+        Team teams[NB_OF_TEAMS];
         bool teamTakingItsTurn;
         int timeUntilGasClosing;
+        int gasClosingInterval;
         int gasClosures = 0;
         int coinsOnGround = -1;
 
@@ -69,6 +69,8 @@ class Node
         
 
     public :
+        //default constructor with no parameter
+        Node();
         //default constructor, when no info about parent nor children
         Node(char *paramMaze, Team *paramTeams, bool paramTeamTakingItsTurn, int paramTimeUntilGasClosing);
         //copy constructor
@@ -94,6 +96,7 @@ class Node
         double getNodeValue();
         bool isSquareInTheGas(int location);
         void printNode();
+        void killAllRobotExceptOneTakingTurn();
 };
 
 #endif

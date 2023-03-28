@@ -182,7 +182,7 @@ double MCTSNode::simulate(){
         if (simulationNode.isCombatOngoing)
             randomChildIndex = std::experimental::randint(-1, 0);
         else
-            randomChildIndex = std::experimental::randint(-1, game::BRANCHING_FACTOR - 2);
+            randomChildIndex = std::experimental::randint(-1, BRANCHING_FACTOR - 2);
 
         //need to see if we are in a tunnel to update cannot turn back
         //TODO : investigate to change this
@@ -218,7 +218,7 @@ void MCTSNode::backpropagate(double paramValue){
 //
 bool MCTSNode::isLeafNode(){
 
-    for (int i=0; i < game::BRANCHING_FACTOR; i++){
+    for (int i=0; i < BRANCHING_FACTOR; i++){
         if (this->pChildNodes[i] != nullptr)
             return false;
     }
@@ -227,7 +227,7 @@ bool MCTSNode::isLeafNode(){
 }
 
 double MCTSNode::getUCB(bool topOfTreeTeam){
-    if (this->pParentNode->teamTakingItsTurn == constants::GORANE_TEAM)
+    if (this->pParentNode->teamTakingItsTurn == GORANE_TEAM)
         return (double) this->value / this->visits + sqrt(2 * log(this->pParentNode->visits) / this->visits);
     else
         return (double) (this->visits - this->value) / this->visits + sqrt(2 * log(this->pParentNode->visits) / this->visits);

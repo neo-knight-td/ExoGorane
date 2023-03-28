@@ -12,7 +12,7 @@ class AStarNode: public Node {
         bool isOnPathToAStar = false;
         bool computeResidualCost = false;
         AStarNode *pParentNode = nullptr;
-        AStarNode *pChildNodes[game::BRANCHING_FACTOR];
+        AStarNode *pChildNodes[BRANCHING_FACTOR];
 
     public :
         //constructor for AStar Node

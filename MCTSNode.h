@@ -1,14 +1,14 @@
-#include "Node.h"
-
 #ifndef MCTS_NODE_H
 #define MCTS_NODE_H
+
+#include "Node.h"
 
 class MCTSNode: public Node {
     public :
         double value = 0;
         int visits = 0;
         MCTSNode *pParentNode = nullptr;
-        MCTSNode *pChildNodes[game::BRANCHING_FACTOR];
+        MCTSNode *pChildNodes[BRANCHING_FACTOR];
 
     public :
         //constructor for MCTSNode
