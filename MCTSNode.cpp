@@ -14,6 +14,7 @@ MCTSNode::MCTSNode(const Node &rhs, MCTSNode* pParamParentNode) : Node(rhs){
     this->pParentNode = pParamParentNode;
 }
 
+/*
 //destructor for MCTS
 MCTSNode::~MCTSNode(){
     //call destructor of child nodes
@@ -24,6 +25,7 @@ MCTSNode::~MCTSNode(){
         delete this->pChildNodes[childIndex];
     }
 }
+*/
 
 //returns the best child node from current node based on MCTS algorithm
 tuple<double, char> MCTSNode::runMCTS(int iterations, bool topOfTreeTeam){
@@ -42,7 +44,6 @@ tuple<double, char> MCTSNode::runMCTS(int iterations, bool topOfTreeTeam){
         //otherwise select among leaves
             std:tie(pSelectedLeafNode, std::ignore) = selectFromLeaves(topOfTreeTeam);
         
-        
         childIndex = -1;
         for (int j = 0; j < pSelectedLeafNode->getDescendanceSize(); j++){
             pSelectedLeafNode->setToNextLegalChildIndex(&childIndex);
@@ -50,7 +51,7 @@ tuple<double, char> MCTSNode::runMCTS(int iterations, bool topOfTreeTeam){
             //expand (generate child)
             pSelectedLeafNode->generateChild(childIndex);
             //simulate (access child you just generated, simulate and return outcome)
-            int result = pSelectedLeafNode->pChildNodes[childIndex]->simulate();
+            double result = pSelectedLeafNode->pChildNodes[childIndex]->simulate();
             //backpropagate towards parents
             pSelectedLeafNode->pChildNodes[childIndex]->backpropagate(result);
         }
@@ -60,20 +61,32 @@ tuple<double, char> MCTSNode::runMCTS(int iterations, bool topOfTreeTeam){
     //TODO : selectFromChildren --> select one child out of children (the one with max ucb)
     int selectedChildIndex = -1;
     double maxUCB = -1;
+    int maxVisits = -1;
 
     childIndex = -1;
     for (int i = 0; i < getDescendanceSize(); i++){
         //update child index
         setToNextLegalChildIndex(&childIndex);
         //record UCB in child node
-        double UCB = this->pChildNodes[childIndex]->getUCB(topOfTreeTeam);
+        //double UCB = this->pChildNodes[childIndex]->getUCB(topOfTreeTeam);
+        //record number of visits in child node
+        int visits = this->pChildNodes[childIndex]->visits;
+        
+        //delete the node
+        delete this->pChildNodes[childIndex];
+        this->pChildNodes[childIndex] = nullptr;
+
         //if UCB is bigger, save it
-        if (UCB > maxUCB){
-            maxUCB = UCB;
+        if (visits > maxVisits){
+            maxVisits = visits;
             selectedChildIndex = childIndex;
         }
     }
 
+    //should delete the tree before returning
+    this->visits = 0;
+    this->value = 0;
+    //TODO : return nb of visits
     return {maxUCB,selectedChildIndex};
 }
 
@@ -158,7 +171,7 @@ void MCTSNode::generateChild(char childIndex){
 }
 
 //simulate a game until bottom of the tree and return outcome
-bool MCTSNode::simulate(){
+double MCTSNode::simulate(){
     //copy current node into simulation node
     MCTSNode simulationNode(*this, nullptr);
     while (!simulationNode.isTerminal()){
@@ -169,16 +182,17 @@ bool MCTSNode::simulate(){
         if (simulationNode.isCombatOngoing)
             randomChildIndex = std::experimental::randint(-1, 0);
         else
-            randomChildIndex = std::experimental::randint(-1, game::BRANCHING_FACTOR - 2);
+            randomChildIndex = std::experimental::randint(-1, BRANCHING_FACTOR - 2);
 
         //need to see if we are in a tunnel to update cannot turn back
         //TODO : investigate to change this
         simulationNode.getDescendanceSize();
 
-        //set random child index to next valid child index
+        //set random child index to next valid child index (default policy)
+        //TODO : improve default policy to apply A Star
         simulationNode.setToNextLegalChildIndex(&randomChildIndex);
         
-        //configure simulation node
+        //configure simulation node directly
         simulationNode.configureChild(randomChildIndex);
 
         //NOTE : debug purpose only
@@ -189,13 +203,13 @@ bool MCTSNode::simulate(){
 }
 
 //update values & visits in node
-void MCTSNode::update(int paramValue){
+void MCTSNode::update(double paramValue){
     this->value += paramValue;
     this->visits++;
 }
 
 //backpropagate value towards parents
-void MCTSNode::backpropagate(int paramValue){
+void MCTSNode::backpropagate(double paramValue){
     update(paramValue);
     if(pParentNode != nullptr)
         this->pParentNode->backpropagate(paramValue);
@@ -204,7 +218,7 @@ void MCTSNode::backpropagate(int paramValue){
 //
 bool MCTSNode::isLeafNode(){
 
-    for (int i=0; i < game::BRANCHING_FACTOR; i++){
+    for (int i=0; i < BRANCHING_FACTOR; i++){
         if (this->pChildNodes[i] != nullptr)
             return false;
     }
@@ -213,8 +227,8 @@ bool MCTSNode::isLeafNode(){
 }
 
 double MCTSNode::getUCB(bool topOfTreeTeam){
-    if (topOfTreeTeam == constants::GORANE_TEAM)
+    if (this->pParentNode->teamTakingItsTurn == GORANE_TEAM)
         return (double) this->value / this->visits + sqrt(2 * log(this->pParentNode->visits) / this->visits);
     else
-        return (double) (1.0 - this->value) / this->visits + sqrt(2 * log(this->pParentNode->visits) / this->visits);
+        return (double) (this->visits - this->value) / this->visits + sqrt(2 * log(this->pParentNode->visits) / this->visits);
 }

@@ -25,7 +25,7 @@ int main()
 
         //add a coin on all squares except those on which a robot lies
         if (i != game::ENEMY1_DEFAULT_LOCATION && i != game::ENEMY2_DEFAULT_LOCATION && i != game::GORANE1_DEFAULT_LOCATION && i != game::GORANE2_DEFAULT_LOCATION)
-             simpleMaze[i] += constants::COIN_MASK;
+             simpleMaze[i] += COIN_MASK;
     }
     int timeUntilGasClosing = game::GAS_CLOSING_INTERVAL;
 
@@ -37,30 +37,30 @@ int main()
     Robot goraneRobots[game::NB_OF_ROBOTS_PER_TEAM];
     Robot enemyRobots[game::NB_OF_ROBOTS_PER_TEAM];
 
-    goraneRobots[constants::GORANE1_INDEX] = G1;
-    goraneRobots[constants::GORANE2_INDEX] = G2;
-    enemyRobots[constants::ENEMY1_INDEX] = E1;
-    enemyRobots[constants::ENEMY2_INDEX] = E2;
+    goraneRobots[GORANE1_INDEX] = G1;
+    goraneRobots[GORANE2_INDEX] = G2;
+    enemyRobots[ENEMY1_INDEX] = E1;
+    enemyRobots[ENEMY2_INDEX] = E2;
 
     Team goraneTeam(goraneRobots);
     Team enemyTeam(enemyRobots);
 
     Team teams[game::NB_OF_TEAMS];
 
-    teams[constants::GORANE_TEAM] = goraneTeam;
-    teams[constants::ENEMY_TEAM] = enemyTeam;
+    teams[GORANE_TEAM] = goraneTeam;
+    teams[ENEMY_TEAM] = enemyTeam;
 
     double valueOfMCTS;
     char selectedChildIndex;
 
     //id of team playing first
-    bool bTeamId = constants::ENEMY_TEAM;
+    bool bTeamId = ENEMY_TEAM;
 
     //init node
     Node myNode = Node(simpleMaze, teams, bTeamId, timeUntilGasClosing);
 
     //init MCTS Node
-    int iteration = 10000;
+    int iteration = 500;
     //init game state
     MCTSNode mctsNode = MCTSNode(myNode, nullptr);
     
@@ -85,6 +85,7 @@ int main()
 
             std::cout << "Robot " << teamNames[mctsNode.teamTakingItsTurn] << " should move to "<< mctsNode.getLocationIncrement(selectedChildIndex) << "." << std::endl;
             std::cout << "Computing time was " << elapsed.count() << " microseconds" << endl;
+            std::cout << "Time until next gas closure is " << mctsNode.timeUntilGasClosing << endl;
         }
         //update node
         mctsNode.configureChild(selectedChildIndex);
@@ -95,5 +96,7 @@ int main()
 
     std::cout << "Game Over" << endl;
     std::cout << "Result is " << mctsNode.getNodeValue() << endl;
+    std::cout << "Score Gorane Team is " << mctsNode.teams[1].coinNb << endl;
+    std::cout << "Score Enemy Team is " << mctsNode.teams[0].coinNb << endl;
 
 }

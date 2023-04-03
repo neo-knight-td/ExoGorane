@@ -16,10 +16,10 @@ tuple<double, char, int, int> MinimaxNode :: runMinimax(){
 
     //if terminal state    
     if (isTerminal())
-        return {(double) getNodeValue(), constants::CHAR_DUMMY_VALUE, this->depthLastEvalUp, this->depthLastEvalDown};
+        return {(double) getNodeValue(), CHAR_DUMMY_VALUE, this->depthLastEvalUp, this->depthLastEvalDown};
     //if max depth is reached
     else if (this->depth >= this->maxDepth)
-        return{(double) evaluate(), constants::CHAR_DUMMY_VALUE, this->depthLastEvalUp, this->depthLastEvalDown};
+        return{(double) evaluate(), CHAR_DUMMY_VALUE, this->depthLastEvalUp, this->depthLastEvalDown};
 
     //otherwise
     else {
@@ -48,7 +48,7 @@ tuple<double, char, int, int> MinimaxNode :: runMinimax(){
         }
 
         //if its maximizer turn then return the value that maximizes the minimum gains of the opponent
-        else if (this->teamTakingItsTurn == constants::GORANE_TEAM){
+        else if (this->teamTakingItsTurn == GORANE_TEAM){
             minimax = -2.0;
 
             selectFromChildren(std::greater<double>(), std::less<int>(), &minimax, &indexToMinimax, &this->depthLastEvalUp, &this->depthLastEvalDown);
@@ -128,7 +128,7 @@ tuple<double, char, int, int> MinimaxNode :: runMinimax(){
         }
 
         //if its minimizer's turn then return the value that minimizes the maximums gains of the opponent
-        else if (this->teamTakingItsTurn == constants::ENEMY_TEAM) {
+        else if (this->teamTakingItsTurn == ENEMY_TEAM) {
             minimax = 2.0;
 
             selectFromChildren(std::less<double>(), std::greater<int>(), &minimax, &indexToMinimax, &this->depthLastEvalUp, &this->depthLastEvalDown);
@@ -247,7 +247,7 @@ void MinimaxNode :: selectFromChildren(std::function<bool(double,double)> compar
         
         //if 2 successors lead to same minimax
         else if (successorMinimax == *minimax){
-            if(this->teamTakingItsTurn == constants::GORANE_TEAM){
+            if(this->teamTakingItsTurn == GORANE_TEAM){
                 
                 if (successorDepthToLastEvalUp < *pDepthLastEvalUp){
                     *indexToMinimax = childIndex;
@@ -256,7 +256,7 @@ void MinimaxNode :: selectFromChildren(std::function<bool(double,double)> compar
                 }                
             }
 
-            else if(this->teamTakingItsTurn == constants::ENEMY_TEAM){
+            else if(this->teamTakingItsTurn == ENEMY_TEAM){
 
                 if (successorDepthToLastEvalDown < *pDepthLastEvalDown){
                     *indexToMinimax = childIndex;

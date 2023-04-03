@@ -1,20 +1,20 @@
-#include "Node.h"
-
 #ifndef MCTS_NODE_H
 #define MCTS_NODE_H
 
+#include "Node.h"
+
 class MCTSNode: public Node {
     public :
-        int value = 0;
+        double value = 0;
         int visits = 0;
         MCTSNode *pParentNode = nullptr;
-        MCTSNode *pChildNodes[game::BRANCHING_FACTOR];
+        MCTSNode *pChildNodes[BRANCHING_FACTOR];
 
     public :
         //constructor for MCTSNode
         MCTSNode(const Node &rhs, MCTSNode* pParamParentNode);
         //TODO : create a destructor !
-        ~MCTSNode();
+        //~MCTSNode();
         //returns the best child node from current node based on MCTS algorithm
         tuple<double, char> runMCTS(int iterations, bool topOfTreeTeam);
         //searches the tree using MCTS algorithm
@@ -24,11 +24,11 @@ class MCTSNode: public Node {
         //expands node from the current node, simulate a child and return values obtained
         void generateChild(char childIndex);
         //simulate a game until bottom of the tree and record outcome
-        bool simulate();
+        double simulate();
         //update values & visits in node
-        void update(int paramValue);
+        void update(double paramValue);
         //backpropagate update towards parent
-        void backpropagate(int paramValue);
+        void backpropagate(double paramValue);
         //checks if node is a leaf node
         bool isLeafNode();
         //get UCB

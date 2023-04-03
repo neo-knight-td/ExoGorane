@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------------
 //NOTE : make sure to include the correct constants ! It will define all the game parameters
-#include "FourRobotsLargeMaze.h"
+#include "FourRobotsRegularMaze.h"
 //--------------------------------------------------------------------------------------------
 #include "Constants.h"
 #include <cstdlib>
@@ -32,7 +32,7 @@ int main()
 
         //add a coin on all squares except those on which a robot lies
         if (abs(G2.location%game::MAZE_WIDTH - i%game::MAZE_WIDTH) + abs(G2.location/game::MAZE_WIDTH - i/game::MAZE_WIDTH) <= 13 && abs(G2.location%game::MAZE_WIDTH - i%game::MAZE_WIDTH) + abs(G2.location/game::MAZE_WIDTH - i/game::MAZE_WIDTH) > 0)
-             simpleMaze[i] += constants::COIN_MASK;
+             simpleMaze[i] += COIN_MASK;
     }
         
     int timeUntilGasClosing = game::GAS_CLOSING_INTERVAL;
@@ -41,21 +41,21 @@ int main()
     Robot goraneRobots[game::NB_OF_ROBOTS_PER_TEAM];
 
 
-    enemyRobots[constants::ENEMY1_INDEX] = E1;
-    enemyRobots[constants::ENEMY2_INDEX] = E2;
-    goraneRobots[constants::GORANE1_INDEX] = G1;
-    goraneRobots[constants::GORANE2_INDEX] = G2;
+    enemyRobots[ENEMY1_INDEX] = E1;
+    enemyRobots[ENEMY2_INDEX] = E2;
+    goraneRobots[GORANE1_INDEX] = G1;
+    goraneRobots[GORANE2_INDEX] = G2;
 
     Team enemyTeam(enemyRobots);
     Team goraneTeam(goraneRobots);
 
     Team teams[game::NB_OF_TEAMS];
 
-    teams[constants::GORANE_TEAM] = goraneTeam;
-    teams[constants::ENEMY_TEAM] = enemyTeam;
+    teams[GORANE_TEAM] = goraneTeam;
+    teams[ENEMY_TEAM] = enemyTeam;
 
     //id of team playing first
-    bool bTeamId = constants::GORANE_TEAM;
+    bool bTeamId = GORANE_TEAM;
 
     //init node
     Node myNode = Node(simpleMaze, teams, bTeamId, timeUntilGasClosing);
