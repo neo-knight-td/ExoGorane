@@ -5,6 +5,7 @@ Youtube extract of the hackathon is available below :
 
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/I6lq8xZG_MM/0.jpg)](https://www.youtube.com/watch?v=I6lq8xZG_MM)
 
+# Documentation
 ## Coding Style Conventions
 ### Comments
 Independently of the programming language, as many comments as possible should be used. Comments related to code synthax (e.g. choice of certain variable type iso another) should start by "`NOTE :`". Comments concerning code improvement (e.g. addition of a functionnality or function) should start by "`TODO :`"
