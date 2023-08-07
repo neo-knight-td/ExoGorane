@@ -1,5 +1,5 @@
 # Introduction
-This is the repository for all code files related to the ExoLegend Hackathon. Code used for the final game of the hackathon is located under the ```Code_Dutra``` folder.
+This is the repository for all code files related to the ExoLegend Hackathon. Code used for the final game of the hackathon is located under the ```Code_Dutra``` folder. This code allowed the team "Les Goranes" to hit the 2nd place of the competition.
 
 ## Coding Style Conventions
 ### Comments
