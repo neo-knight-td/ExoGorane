@@ -1,6 +1,8 @@
 # Introduction
 This is the repository for all code files related to the ExoLegend Hackathon.
 
+Code used for the final game of the hackathon is located in ```Code_Dutra``` folder.
+
 # Coding Style Conventions
 ## Comments
 Independently of the programming language, as many comments as possible should be used. Comments related to code synthax (e.g. choice of certain variable type iso another) should start by "`NOTE :`". Comments concerning code improvement (e.g. addition of a functionnality or function) should start by "`TODO :`"
